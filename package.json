@@ -8,7 +8,8 @@
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
     "check:site": "node scripts/check-site.mjs",
-    "test": "npm run build && npm run check:site"
+    "test": "npm run build && npm run check:site",
+    "audit": "node scripts/audit.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.8",
@@ -17,5 +18,11 @@
     "astro": "^7.4.0",
     "better-sqlite3": "^13.0.3",
     "nodemailer": "^10.1.2"
+  },
+  "devDependencies": {
+    "axe-core": "^4.14.0",
+    "chrome-launcher": "^1.2.2",
+    "lighthouse": "^13.5.0",
+    "puppeteer-core": "^25.14.0"
   }
 }

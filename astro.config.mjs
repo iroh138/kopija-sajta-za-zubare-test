@@ -12,7 +12,6 @@ export default defineConfig({
   // Pages are prerendered by default; /book and /admin opt out (prerender = false).
   output: 'static',
   adapter: node({ mode: 'standalone' }),
-  build: { format: 'file' },
   integrations: [
     sitemap({
       filter: (page) => !page.includes('/admin') && !page.includes('/book/thanks'),
