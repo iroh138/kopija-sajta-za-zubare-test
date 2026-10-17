@@ -1,0 +1,39 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { breadcrumbJsonLd } from '../../lib/schema';
+import { practice } from '../../lib/practice';
+
+const staff = (await getCollection('staff')).sort((a, b) => a.data.order - b.data.order);
+const members = await Promise.all(staff.map(async (s) => ({ s, Content: (await render(s)).Content })));
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'About', path: '/about' }, { name: 'Team', path: '/about/team' }];
+const site = Astro.site ?? new URL(Astro.url.origin);
+const people = staff.map((s) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: s.data.name,
+  jobTitle: s.data.role,
+  ...(s.data.credentials ? { honorificSuffix: s.data.credentials } : {}),
+  worksFor: { '@id': new URL('/#practice', site).href },
+}));
+---
+<Base title="Meet the team" description={`The orthodontist and team at ${practice.name}.`} jsonLd={[breadcrumbJsonLd(site, crumbs), ...people]}>
+  <PageHeader title="Meet the team" crumbs={crumbs} />
+  <section class="section">
+    <div class="container grid grid--2">
+      {members.map(({ s, Content }) => (
+        <article class="card">
+          {s.data.photo && <img src={s.data.photo.src} alt={s.data.photo.alt} width={s.data.photo.width} height={s.data.photo.height} loading="lazy" class="photo" />}
+          <h2>{s.data.name}{s.data.credentials && <span class="muted">, {s.data.credentials}</span>}</h2>
+          <p class="eyebrow">{s.data.role}</p>
+          <Content />
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>
+<style>
+  .photo { border-radius: var(--radius); margin-bottom: var(--space-2); }
+  h2 { font-size: var(--step-2); }
+</style>

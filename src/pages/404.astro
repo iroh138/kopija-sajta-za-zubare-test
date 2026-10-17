@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { practice } from '../lib/practice';
+---
+<Base title="Page not found" description="This page does not exist." noindex>
+  <PageHeader title="Page not found" lead="The page may have moved. These links usually help:">
+    <div class="btn-row">
+      <a class="btn btn--primary" href="/">Home</a>
+      <a class="btn btn--secondary" href="/services">Services</a>
+      <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call {practice.phone.display}</a>
+    </div>
+  </PageHeader>
+</Base>

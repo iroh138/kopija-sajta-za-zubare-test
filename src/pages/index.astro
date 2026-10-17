@@ -1,0 +1,206 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import LocationBlock from '../components/LocationBlock.astro';
+import { practice } from '../lib/practice';
+
+const services = await getCollection('services');
+const featured = services
+  .filter((s) => s.data.featuredOnHome)
+  .sort((a, b) => a.data.order - b.data.order);
+const technology = services
+  .filter((s) => s.data.category.id === 'technology')
+  .sort((a, b) => a.data.order - b.data.order);
+const testimonials = (await getCollection('testimonials'))
+  .filter((t) => t.data.consentRecorded && t.data.source)
+  .sort((a, b) => b.data.reviewDate.getTime() - a.data.reviewDate.getTime())
+  .slice(0, 3);
+const insurers = practice.insurers.filter((i) => i.accepted);
+const { city, region } = practice.address;
+---
+<Base
+  title={`${practice.specialty} in ${city}, ${region}`}
+  description={`${practice.name} is an ${practice.specialty.toLowerCase()} in ${city}, ${region}. Braces, clear aligners, jaw expansion and airway assessment. Free first consultation.`}
+>
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <p class="eyebrow">{practice.name}</p>
+        <h1>{practice.specialty} in {city}, {region}</h1>
+        <p class="lead">{practice.tagline}.</p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="/book">Book a visit</a>
+          <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call {practice.phone.display}</a>
+        </div>
+        {practice.freeConsultation.offered && <p class="hero__note">First consultation free · {practice.acceptingNewPatients ? 'Accepting new patients' : 'Waiting list open'}</p>}
+      </div>
+      <svg class="hero__art" viewBox="0 0 400 320" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#cffafe" /><stop offset="1" stop-color="#a7f3d0" />
+          </linearGradient>
+        </defs>
+        <rect x="20" y="20" width="360" height="280" rx="40" fill="url(#g1)" />
+        <path d="M70 200 C 130 120, 270 120, 330 200" stroke="#0e7490" stroke-width="10" fill="none" stroke-linecap="round" />
+        <g fill="#ffffff" stroke="#0e7490" stroke-width="4">
+          <rect x="92" y="150" width="34" height="44" rx="12" />
+          <rect x="140" y="128" width="36" height="48" rx="12" />
+          <rect x="190" y="120" width="36" height="50" rx="12" />
+          <rect x="240" y="128" width="36" height="48" rx="12" />
+          <rect x="288" y="150" width="34" height="44" rx="12" />
+        </g>
+        <path d="M110 250 q 90 40 180 0" stroke="#047857" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6" />
+      </svg>
+    </div>
+  </section>
+
+  <section class="section section--surface" aria-labelledby="intro-h">
+    <div class="container intro">
+      <div>
+        <p class="eyebrow">Why patients come to us</p>
+        <h2 id="intro-h">Straight teeth are only part of the plan</h2>
+      </div>
+      <div>
+        <p>We look at how teeth, jaws and breathing work together, then plan treatment that holds up long after the braces or aligners come off.</p>
+        <p>Patients visit from {practice.serviceAreas.slice(0, -1).join(', ')} and {practice.serviceAreas.at(-1)}.</p>
+        <a class="btn btn--secondary" href="/about">About the practice</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="services-h">
+    <div class="container">
+      <p class="eyebrow">Treatments</p>
+      <h2 id="services-h">What we treat</h2>
+      <div class="grid grid--3">
+        {featured.map((s) => (
+          <ServiceCard title={s.data.title} summary={s.data.summary} href={`/services/${s.data.category.id}/${s.id}`} />
+        ))}
+      </div>
+      <p style="margin-top: var(--space-3)"><a class="btn btn--secondary" href="/services">See all services</a></p>
+    </div>
+  </section>
+
+  {technology.length > 0 && (
+    <section class="section section--muted" aria-labelledby="tech-h">
+      <div class="container">
+        <p class="eyebrow">Technology</p>
+        <h2 id="tech-h">We measure before we plan</h2>
+        <div class="grid grid--2">
+          {technology.map((s) => (
+            <ServiceCard title={s.data.title} summary={s.data.summary} href={`/services/technology/${s.id}`} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section section--surface" aria-labelledby="reasons-h">
+    <div class="container">
+      <p class="eyebrow">Our approach</p>
+      <h2 id="reasons-h">How we work</h2>
+      <ol class="reasons">
+        {practice.reasons.map((r, i) => (
+          <li class="reasons__item">
+            <span class="reasons__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{r.title}</h3>
+            <p>{r.body}</p>
+          </li>
+        ))}
+      </ol>
+      <a class="btn btn--secondary" href="/about/team">Meet the team</a>
+    </div>
+  </section>
+
+  {testimonials.length > 0 && (
+    <section class="section" aria-labelledby="reviews-h">
+      <div class="container">
+        <p class="eyebrow">Patient reviews</p>
+        <h2 id="reviews-h">What patients say</h2>
+        <div class="grid grid--3">
+          {testimonials.map((t) => (
+            <figure class="card review">
+              <p class="review__stars" aria-label={`Rated ${t.data.rating} out of 5`}>{'★'.repeat(t.data.rating)}{'☆'.repeat(5 - t.data.rating)}</p>
+              <blockquote><p>{t.data.body}</p></blockquote>
+              <figcaption>
+                {t.data.author} · {t.data.sourceUrl ? <a href={t.data.sourceUrl} rel="noopener">{t.data.source}</a> : t.data.source} ·{' '}
+                <time datetime={t.data.reviewDate.toISOString().slice(0, 10)}>{t.data.reviewDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</time>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+        {practice.profileUrl && <p style="margin-top: var(--space-3)"><a href={practice.profileUrl}>Read all reviews</a></p>}
+      </div>
+    </section>
+  )}
+
+  {practice.freeConsultation.offered && (
+    <section class="section cta" aria-labelledby="cta-h">
+      <div class="container cta__inner">
+        <h2 id="cta-h">Not sure where to start?</h2>
+        <p class="lead">{practice.freeConsultation.note}</p>
+        <a class="btn btn--primary" href="/book">Book a free consultation</a>
+      </div>
+    </section>
+  )}
+
+  {(insurers.length > 0 || practice.payments.length > 0) && (
+    <section class="section section--surface" aria-labelledby="pay-h">
+      <div class="container">
+        <p class="eyebrow">Insurance and payment</p>
+        <h2 id="pay-h">Paying for treatment</h2>
+        <div class="grid grid--2">
+          {insurers.length > 0 && (
+            <div>
+              <h3>Insurance we accept</h3>
+              <ul class="ticks">{insurers.map((i) => <li>{i.name}</li>)}</ul>
+            </div>
+          )}
+          {practice.payments.length > 0 && (
+            <div>
+              <h3>Payment options</h3>
+              <ul class="ticks">{practice.payments.map((p) => <li><strong>{p.name}.</strong> {p.description}</li>)}</ul>
+            </div>
+          )}
+        </div>
+        <p><a href="/patient-info">Insurance and payment details</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="section" aria-label="Location and hours">
+    <div class="container">
+      <LocationBlock />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { padding-block: var(--space-5); background: var(--color-surface); }
+  .hero__inner { display: grid; gap: var(--space-4); align-items: center; }
+  @media (min-width: 900px) { .hero__inner { grid-template-columns: 1.2fr 1fr; } .hero { padding-block: var(--space-6); } }
+  .hero__note { margin-top: var(--space-2); font-weight: 700; color: var(--color-accent); }
+  .hero__art { width: 100%; max-width: 30rem; justify-self: center; }
+
+  .intro { display: grid; gap: var(--space-3); }
+  @media (min-width: 900px) { .intro { grid-template-columns: 1fr 1.3fr; } }
+
+  .reasons { list-style: none; padding: 0; margin: 0 0 var(--space-3); display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+  .reasons__item { border-top: 3px solid var(--color-accent); padding-top: var(--space-2); }
+  .reasons__num { display: block; font-weight: 700; color: var(--color-accent); margin-bottom: 0.25rem; }
+
+  .review blockquote { margin: 0; }
+  .review__stars { color: #b45309; font-size: var(--step-1); letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+  .review figcaption { color: var(--color-muted); font-size: var(--step--1); }
+
+  .cta { background: var(--color-primary); color: var(--color-on-primary); text-align: center; }
+  .cta__inner { display: flex; flex-direction: column; align-items: center; }
+  .cta .lead { color: var(--color-on-primary); margin-inline: auto; }
+  .cta .btn--primary { background: var(--color-surface); color: var(--color-primary); border-color: var(--color-surface); }
+  .cta .btn--primary:hover { background: var(--color-bg); }
+  .cta :focus-visible { outline-color: #fff; }
+
+  .ticks { padding-left: 1.2rem; }
+  .ticks li { margin-bottom: 0.4rem; }
+</style>

@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { practice } from '../lib/practice';
+import { breadcrumbJsonLd } from '../lib/schema';
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Patient info', path: '/patient-info' }];
+const site = Astro.site ?? new URL(Astro.url.origin);
+const insurers = practice.insurers.filter((i) => i.accepted);
+---
+<Base title="Patient information, insurance and payment" description={`Insurance accepted, payment options and what to bring to your first visit at ${practice.name}.`} jsonLd={[breadcrumbJsonLd(site, crumbs)]}>
+  <PageHeader title="Patient information" lead="Insurance, payment and your first visit." crumbs={crumbs} />
+  <section class="section section--surface">
+    <div class="container prose">
+      <h2>Your first visit</h2>
+      <p>Allow about an hour. Bring photo ID, your insurance card if you have one, and a list of current medications. A parent or guardian must attend with patients under 18.</p>
+      {practice.freeConsultation.offered && <p>{practice.freeConsultation.note}</p>}
+      <h2>Insurance</h2>
+      {insurers.length > 0 ? (
+        <>
+          <p>We are in network with:</p>
+          <ul>{insurers.map((i) => <li>{i.name}{i.notes && <> — {i.notes}</>}</li>)}</ul>
+          <p>Not listed? Call <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a> and we will check your benefits before treatment starts.</p>
+        </>
+      ) : <p>Call us to check your coverage.</p>}
+      <h2>Payment options</h2>
+      <ul>{practice.payments.map((p) => <li><strong>{p.name}.</strong> {p.description}</li>)}</ul>
+      <a class="btn btn--primary" href="/book">Book a visit</a>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,38 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import { breadcrumbJsonLd } from '../../../lib/schema';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', (p) => !p.data.draft);
+  return posts.map((p) => ({ params: { slug: p.id }, props: { post: p } }));
+}
+const { post } = Astro.props;
+const author = await getEntry(post.data.author);
+const { Content } = await render(post);
+const path = `/about/blog/${post.id}`;
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Blog', path: '/about/blog' }, { name: post.data.title, path }];
+const site = Astro.site ?? new URL(Astro.url.origin);
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.publishedAt.toISOString().slice(0, 10),
+  url: new URL(path, site).href,
+  ...(author ? { author: { '@type': 'Person', name: author.data.name } } : {}),
+  publisher: { '@id': new URL('/#practice', site).href },
+};
+---
+<Base title={post.data.title} description={post.data.description} jsonLd={[breadcrumbJsonLd(site, crumbs), article]}>
+  <PageHeader title={post.data.title} crumbs={crumbs}>
+    <p class="muted">
+      {author && <>By {author.data.name} · </>}
+      <time datetime={post.data.publishedAt.toISOString().slice(0, 10)}>{post.data.publishedAt.toLocaleDateString('en-US', { dateStyle: 'long' })}</time>
+    </p>
+  </PageHeader>
+  <section class="section section--surface">
+    <article class="container prose"><Content /></article>
+  </section>
+</Base>

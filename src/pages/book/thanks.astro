@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { practice } from '../../lib/practice';
+---
+<Base title="Request received" description="We have your appointment request." noindex>
+  <PageHeader title="Thank you — we have your request" lead="Here is what happens next.">
+    <ol class="steps">
+      <li>We review your request within one working day.</li>
+      <li>We contact you the way you asked, to agree a time.</li>
+      <li>You get a confirmation with the date, time and what to bring.</li>
+    </ol>
+    <p>Need us sooner? Call <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a>.</p>
+    <a class="btn btn--secondary" href="/">Back to home</a>
+  </PageHeader>
+</Base>
+<style>
+  .steps { padding-left: 1.3rem; margin-bottom: var(--space-3); }
+  .steps li { margin-bottom: 0.4rem; }
+</style>

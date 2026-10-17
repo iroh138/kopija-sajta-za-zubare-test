@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import { practice, addressLine } from '../lib/practice';
+import HoursTable from './HoursTable.astro';
+
+const categories = (await getCollection('categories')).sort((a, b) => a.data.order - b.data.order);
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div>
+      <p class="site-footer__name">{practice.name}</p>
+      <address>
+        <a href={practice.mapsUrl} data-nap="address">{addressLine()}</a><br />
+        <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a><br />
+        <a href={`mailto:${practice.email}`}>{practice.email}</a>
+      </address>
+      {practice.social.length > 0 && (
+        <ul class="social" aria-label="Social profiles">
+          {practice.social.map((s) => <li><a href={s.url} rel="noopener">{s.network}</a></li>)}
+        </ul>
+      )}
+    </div>
+    <div>
+      <h2 class="site-footer__heading">Hours</h2>
+      <HoursTable showSpecial={false} caption="Opening hours (footer)" />
+    </div>
+    <nav aria-label="Footer">
+      <h2 class="site-footer__heading">Explore</h2>
+      <ul class="links">
+        <li><a href="/services">All services</a></li>
+        {categories.map((c) => <li><a href={`/services/${c.id}`}>{c.data.name}</a></li>)}
+        <li><a href="/about">About</a></li>
+        <li><a href="/patient-info">Patient info</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container site-footer__bottom">
+    <p>© {year} {practice.name}. All rights reserved.</p>
+  </div>
+</footer>
+<style>
+  .site-footer { background: #0b3a4a; color: #e0f2fe; padding-block: var(--space-5) var(--space-3); margin-bottom: 4.5rem; }
+  @media (min-width: 1024px) { .site-footer { margin-bottom: 0; } }
+  .site-footer a { color: #e0f2fe; }
+  .site-footer a:hover { color: #ffffff; }
+  .site-footer :focus-visible { outline-color: #ffffff; }
+  .site-footer__grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+  .site-footer__name { font-weight: 700; font-size: var(--step-1); }
+  .site-footer__heading { font-size: var(--step-0); text-transform: uppercase; letter-spacing: 0.06em; }
+  address { font-style: normal; line-height: 1.9; }
+  .social, .links { list-style: none; padding: 0; margin: var(--space-2) 0 0; line-height: 2.1; }
+  .social { display: flex; gap: var(--space-2); }
+  .site-footer :global(.hours-table th), .site-footer :global(.hours-table td) { border-color: #1e5b6e; }
+  .site-footer__bottom { border-top: 1px solid #1e5b6e; margin-top: var(--space-4); padding-top: var(--space-2); font-size: var(--step--1); }
+</style>

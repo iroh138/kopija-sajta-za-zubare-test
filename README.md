@@ -1,0 +1,72 @@
+# Orthodontic practice website
+
+A CMS-driven site for an orthodontic practice, built from the reverse-engineering spec
+("Orthodontic Site Rebuild — Reverse-Engineering Analysis & Build Spec"). It keeps the
+analysed site's structure and conversion paths, fixes its defects, and uses **no** text,
+name, logo, images or colours from it. All content is placeholder until a client supplies theirs.
+
+Stack: [Astro](https://astro.build) 7 (static pages) + Node adapter for the two dynamic routes,
+SQLite (better-sqlite3) for appointment requests.
+
+## Run it
+
+```bash
+npm install
+cp .env.example .env      # fill in values
+npm run dev               # http://localhost:4321
+npm test                  # build + acceptance checks
+npm run build && npm start
+```
+
+Node 22.22+ required (Astro 7).
+
+## Where things live
+
+| What | File |
+| --- | --- |
+| Name, address, phone, email, hours, special dates, service areas, insurers, payments | `src/data/practice.json` (single source of truth, validated on build) |
+| Service categories | `src/content/categories.json` |
+| Services and technology (one Markdown file each) | `src/content/services/*.md` |
+| Team | `src/content/staff/*.md` |
+| Blog | `src/content/blog/*.md` |
+| Testimonials | `src/content/testimonials.json` (rendered only with `consentRecorded: true` and a `source`) |
+| Design tokens | `src/styles/global.css` |
+| Booking form | `src/pages/book/index.astro` (server-rendered) |
+| Request list for staff | `/admin` (HTTP Basic auth, `ADMIN_USER` / `ADMIN_PASSWORD`) |
+
+Header, footer, contact blocks and JSON-LD all read `practice.json`, so phone, address and
+hours cannot disagree. Hours are rendered at build time: **rebuild after editing them**.
+
+## Routes
+
+`/`, `/about`, `/about/team`, `/about/blog`, `/about/blog/{slug}`, `/services`,
+`/services/{category}`, `/services/{category}/{slug}`, `/patient-info`, `/contact`,
+`/book`, `/book/thanks`, `/privacy`, `/admin`, `/sitemap-index.xml`, `/robots.txt`.
+
+## Booking
+
+- Works without JavaScript; server-side validation with an error summary.
+- Under-18 patients require a guardian name.
+- Honeypot field; 5 complete submissions per IP per 10 minutes (in memory, single instance).
+- Cross-site form posts are rejected by Astro's origin check, which compares against the
+  request origin — set `SITE_URL` to the real production origin.
+- No medical fields; the note field tells patients not to include medical details.
+- Notification email (optional, `SMTP_*` + `NOTIFY_EMAIL`) contains only the request number
+  and a link to `/admin`, not the patient's details.
+- Status workflow in `/admin`: new → contacted → booked / closed.
+
+## Acceptance checks (`npm run check:site`)
+
+On every built page: exactly one `<h1>`, unique `<title>`, meta description, `alt` on every
+image, every `tel:` link and the JSON-LD phone equal to `practice.json`, JSON-LD postcode and
+hours count match, and none of the analysed site's strings present.
+
+## Before launch
+
+- [ ] Replace all placeholder content (every page marked *Placeholder*)
+- [ ] Clinician approves all clinical text
+- [ ] Legal review of `/privacy` (HIPAA/GDPR/local law as applicable)
+- [ ] Real coordinates in `practice.json` (`geo`, `mapsUrl`, `profileUrl`)
+- [ ] `public/og-default.png` and `public/favicon.svg` replaced with the client's brand
+- [ ] HTTPS, `SITE_URL`, admin credentials, SMTP set; `DATA_DIR` backed up
+- [ ] Rich Results Test and Lighthouse run against the deployed URL

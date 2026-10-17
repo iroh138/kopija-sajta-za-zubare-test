@@ -1,0 +1,38 @@
+---
+import { practice, addressLine } from '../lib/practice';
+import HoursTable from './HoursTable.astro';
+
+interface Props { headingLevel?: 'h2' | 'h3' }
+const { headingLevel = 'h2' } = Astro.props;
+const H = headingLevel;
+const { lat, lng } = practice.geo;
+const d = 0.006;
+const embed = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d}%2C${lat - d}%2C${lng + d}%2C${lat + d}&layer=mapnik&marker=${lat}%2C${lng}`;
+---
+<div class="location">
+  <div class="location__map">
+    <iframe src={embed} title={`Map showing ${practice.name}`} loading="lazy" referrerpolicy="no-referrer"></iframe>
+  </div>
+  <div class="location__info">
+    <H>Find us</H>
+    <address>
+      <strong>{practice.name}</strong><br />
+      <span data-nap="address">{addressLine()}</span><br />
+      <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a>
+    </address>
+    <p><a href={practice.mapsUrl}>Get directions</a></p>
+    <h3>Opening hours</h3>
+    <HoursTable />
+    <div class="btn-row" style="margin-top: var(--space-3)">
+      <a class="btn btn--primary" href="/book">Book a visit</a>
+      <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call {practice.phone.display}</a>
+    </div>
+  </div>
+</div>
+<style>
+  .location { display: grid; gap: var(--space-4); align-items: start; }
+  @media (min-width: 900px) { .location { grid-template-columns: 1.1fr 1fr; } }
+  .location__map { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); aspect-ratio: 4 / 3; background: var(--color-surface-muted); }
+  .location__map iframe { width: 100%; height: 100%; border: 0; display: block; }
+  address { font-style: normal; margin-bottom: var(--space-2); line-height: 1.8; }
+</style>

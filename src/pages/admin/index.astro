@@ -1,0 +1,104 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import { listRequests, updateStatus, STATUSES, type Status } from '../../lib/db';
+import { TIME_OPTIONS, CONTACT_OPTIONS } from '../../lib/booking';
+import { practice } from '../../lib/practice';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const id = Number(form.get('id'));
+  const status = String(form.get('status')) as Status;
+  if (Number.isInteger(id) && STATUSES.includes(status)) updateStatus(id, status);
+  const back = String(form.get('filter') ?? '');
+  return Astro.redirect(`/admin${STATUSES.includes(back as Status) ? `?status=${back}` : ''}`, 303);
+}
+
+const filterParam = Astro.url.searchParams.get('status');
+const filter = STATUSES.includes(filterParam as Status) ? (filterParam as Status) : undefined;
+const rows = listRequests(filter);
+const all = listRequests();
+const counts = Object.fromEntries(STATUSES.map((s) => [s, all.filter((r) => r.status === s).length]));
+const serviceNames = Object.fromEntries((await getCollection('services')).map((s) => [s.id, s.data.title]));
+const timeLabel = (v: string) => v.split(',').filter(Boolean).map((t) => TIME_OPTIONS.find((o) => o.value === t)?.label ?? t).join(', ') || '—';
+const contactLabel = (v: string) => CONTACT_OPTIONS.find((o) => o.value === v)?.label ?? v;
+const fmt = (iso: string) => new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Appointment requests · {practice.name}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="admin">
+      <h1>Appointment requests</h1>
+      <nav class="filters" aria-label="Filter by status">
+        <a href="/admin" aria-current={!filter ? 'page' : undefined}>All ({all.length})</a>
+        {STATUSES.map((s) => <a href={`/admin?status=${s}`} aria-current={filter === s ? 'page' : undefined}>{s} ({counts[s]})</a>)}
+      </nav>
+      {rows.length === 0 ? <p>No requests{filter ? ` with status “${filter}”` : ''}.</p> : (
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Received</th><th>Patient</th><th>Contact</th><th>Interest</th><th>Times</th><th>Note</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr class={`st-${r.status}`}>
+                  <td>{r.id}</td>
+                  <td>{fmt(r.created_at)}</td>
+                  <td>
+                    <strong>{r.patient_name}</strong><br />
+                    {r.patient_type === 'new' ? 'New' : 'Existing'}{r.patient_is_minor ? ` · under 18, guardian: ${r.guardian_name}` : ''}
+                  </td>
+                  <td>
+                    <a href={`tel:${r.phone}`}>{r.phone}</a>
+                    {r.email && <><br /><a href={`mailto:${r.email}`}>{r.email}</a></>}
+                    <br /><span class="muted">Prefers: {contactLabel(r.preferred_contact)}</span>
+                  </td>
+                  <td>{r.service_interest ? serviceNames[r.service_interest] ?? r.service_interest : '—'}</td>
+                  <td>{timeLabel(r.preferred_times)}</td>
+                  <td>{r.message ?? '—'}</td>
+                  <td>
+                    <form method="post">
+                      <input type="hidden" name="id" value={r.id} />
+                      <input type="hidden" name="filter" value={filter ?? ''} />
+                      <label class="visually-hidden" for={`st-${r.id}`}>Status for request {r.id}</label>
+                      <select id={`st-${r.id}`} name="status">
+                        {STATUSES.map((s) => <option value={s} selected={r.status === s}>{s}</option>)}
+                      </select>
+                      <button type="submit">Save</button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </main>
+    <style is:global>
+      body { margin: 0; font: 15px/1.5 system-ui, sans-serif; color: #0f172a; background: #f8fafc; }
+      .admin { padding: 1.5rem; max-width: 90rem; margin: 0 auto; }
+      h1 { margin: 0 0 1rem; }
+      .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+      .filters a { padding: 0.4rem 0.8rem; border: 1px solid #94a3b8; border-radius: 999px; color: #0f172a; text-decoration: none; text-transform: capitalize; }
+      .filters a[aria-current='page'] { background: #0e7490; color: #fff; border-color: #0e7490; }
+      .table-wrap { overflow-x: auto; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { text-align: left; vertical-align: top; padding: 0.6rem 0.75rem; border-bottom: 1px solid #e2e8f0; }
+      th { background: #f1f5f9; white-space: nowrap; }
+      tr.st-new td:first-child { box-shadow: inset 4px 0 0 #0e7490; }
+      .muted { color: #475569; }
+      form { display: flex; gap: 0.4rem; }
+      select, button { font: inherit; padding: 0.3rem 0.5rem; }
+      button { background: #0e7490; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
+      .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    </style>
+  </body>
+</html>

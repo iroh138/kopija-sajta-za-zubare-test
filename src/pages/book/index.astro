@@ -1,0 +1,240 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { practice } from '../../lib/practice';
+import { parseBooking, emptyValues, rateLimited, TIME_OPTIONS, CONTACT_OPTIONS, type BookingErrors } from '../../lib/booking';
+import { insertRequest } from '../../lib/db';
+import { notifyPractice } from '../../lib/mail';
+
+const services = (await getCollection('services'))
+  .filter((s) => s.data.category.id !== 'technology')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const serviceIds = services.map((s) => s.id);
+
+let values = emptyValues();
+let errors: BookingErrors = {};
+let formError = '';
+
+const requested = Astro.url.searchParams.get('service');
+if (requested && serviceIds.includes(requested)) values.service = requested;
+
+if (Astro.request.method === 'POST') {
+  let ip = 'unknown';
+  try { ip = Astro.clientAddress; } catch { /* not available behind some proxies */ }
+  const form = await Astro.request.formData();
+  const parsed = parseBooking(form, serviceIds);
+  values = parsed.values;
+  errors = parsed.errors;
+
+  if (parsed.isBot) return Astro.redirect('/book/thanks', 303);
+  // Only complete submissions count toward the limit, so a visitor fixing typos is never locked out.
+  if (Object.keys(errors).length === 0 && rateLimited(ip)) {
+    Astro.response.status = 429;
+    formError = `Too many requests from this connection. Please call us on ${practice.phone.display}.`;
+  } else if (Object.keys(errors).length === 0) {
+    try {
+      const id = insertRequest({
+        patient_name: values.patientName,
+        patient_is_minor: values.patientIsMinor === 'yes' ? 1 : 0,
+        guardian_name: values.patientIsMinor === 'yes' ? values.guardianName : null,
+        phone: values.phone,
+        email: values.email || null,
+        preferred_contact: values.preferredContact,
+        patient_type: values.patientType,
+        service_interest: values.service || null,
+        preferred_times: values.preferredTimes.join(','),
+        message: values.message || null,
+        consent_privacy: 1,
+        source: form.get('source')?.toString().slice(0, 300) || Astro.request.headers.get('referer')?.slice(0, 300) || null,
+      });
+      await notifyPractice({ id, preferred_contact: values.preferredContact, patient_type: values.patientType }, practice.name);
+      return Astro.redirect('/book/thanks', 303);
+    } catch (err) {
+      console.error('[booking] could not store request', err);
+      Astro.response.status = 500;
+      formError = `Sorry, we could not save your request. Please call us on ${practice.phone.display}.`;
+    }
+  } else {
+    Astro.response.status = 422;
+  }
+}
+
+const errorList = Object.entries(errors) as [string, string][];
+const describe = (field: string) => (errors as Record<string, string>)[field] ? `${field}-error` : undefined;
+---
+<Base title="Book a visit" description={`Request an appointment at ${practice.name}. We reply within one working day.`}>
+  <PageHeader
+    title="Book a visit"
+    lead="Tell us how to reach you and when suits you. We call or message back within one working day to confirm a time."
+    crumbs={[{ name: 'Home', path: '/' }, { name: 'Book a visit', path: '/book' }]}
+  >
+    <p>Prefer to talk? Call <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a>.</p>
+  </PageHeader>
+
+  <section class="section">
+    <div class="container booking">
+      {(errorList.length > 0 || formError) && (
+        <div class="error-summary" role="alert" tabindex="-1" id="error-summary">
+          <h2>{formError ? 'Something went wrong' : 'Please check the form'}</h2>
+          {formError && <p>{formError}</p>}
+          {errorList.length > 0 && (
+            <ul>{errorList.map(([field, msg]) => <li><a href={`#${field}`}>{msg}</a></li>)}</ul>
+          )}
+        </div>
+      )}
+
+      <form method="post" action="/book" class="card form" novalidate>
+        <input type="hidden" name="source" value="" id="source" />
+        <div class="hp" aria-hidden="true">
+          <label for="website">Leave this field empty</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <fieldset>
+          <legend>About the patient</legend>
+          <div class="field">
+            <label for="patientName">Patient’s full name</label>
+            {errors.patientName && <p class="field__error" id="patientName-error">{errors.patientName}</p>}
+            <input id="patientName" name="patientName" type="text" autocomplete="name" required value={values.patientName}
+                   aria-invalid={errors.patientName ? 'true' : undefined} aria-describedby={describe('patientName')} />
+          </div>
+
+          <fieldset class="field" id="patientIsMinor" aria-describedby={describe('patientIsMinor')}>
+            <legend>Is the patient under 18?</legend>
+            {errors.patientIsMinor && <p class="field__error" id="patientIsMinor-error">{errors.patientIsMinor}</p>}
+            <div class="choices">
+              <label><input type="radio" name="patientIsMinor" value="yes" checked={values.patientIsMinor === 'yes'} required /> Yes</label>
+              <label><input type="radio" name="patientIsMinor" value="no" checked={values.patientIsMinor === 'no'} /> No</label>
+            </div>
+          </fieldset>
+
+          <div class="field" data-show-if-minor>
+            <label for="guardianName">Parent or guardian’s name <span class="muted">(required if under 18)</span></label>
+            {errors.guardianName && <p class="field__error" id="guardianName-error">{errors.guardianName}</p>}
+            <input id="guardianName" name="guardianName" type="text" autocomplete="name" value={values.guardianName}
+                   aria-invalid={errors.guardianName ? 'true' : undefined} aria-describedby={describe('guardianName')} />
+          </div>
+
+          <fieldset class="field" id="patientType" aria-describedby={describe('patientType')}>
+            <legend>Have you been to us before?</legend>
+            {errors.patientType && <p class="field__error" id="patientType-error">{errors.patientType}</p>}
+            <div class="choices">
+              <label><input type="radio" name="patientType" value="new" checked={values.patientType === 'new'} required /> New patient</label>
+              <label><input type="radio" name="patientType" value="existing" checked={values.patientType === 'existing'} /> Existing patient</label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="service">What would you like to discuss? <span class="muted">(optional)</span></label>
+            <select id="service" name="service">
+              <option value="">Not sure yet</option>
+              {services.map((s) => <option value={s.id} selected={values.service === s.id}>{s.data.title}</option>)}
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>How to reach you</legend>
+          <div class="field">
+            <label for="phone">Phone number</label>
+            {errors.phone && <p class="field__error" id="phone-error">{errors.phone}</p>}
+            <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required value={values.phone}
+                   aria-invalid={errors.phone ? 'true' : undefined} aria-describedby={describe('phone')} />
+          </div>
+          <div class="field">
+            <label for="email">Email <span class="muted">(optional)</span></label>
+            {errors.email && <p class="field__error" id="email-error">{errors.email}</p>}
+            <input id="email" name="email" type="email" autocomplete="email" value={values.email}
+                   aria-invalid={errors.email ? 'true' : undefined} aria-describedby={describe('email')} />
+          </div>
+          <fieldset class="field" id="preferredContact" aria-describedby={describe('preferredContact')}>
+            <legend>Best way to contact you</legend>
+            {errors.preferredContact && <p class="field__error" id="preferredContact-error">{errors.preferredContact}</p>}
+            <div class="choices">
+              {CONTACT_OPTIONS.map((o) => (
+                <label><input type="radio" name="preferredContact" value={o.value} checked={values.preferredContact === o.value} /> {o.label}</label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset class="field">
+            <legend>When suits you? <span class="muted">(optional)</span></legend>
+            <div class="choices">
+              {TIME_OPTIONS.map((o) => (
+                <label><input type="checkbox" name="preferredTimes" value={o.value} checked={values.preferredTimes.includes(o.value)} /> {o.label}</label>
+              ))}
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="message">Anything we should know before we call? <span class="muted">(optional, max 500 characters)</span></label>
+            <p class="field__hint" id="message-hint">Please don’t include medical details here. We’ll discuss those with you directly.</p>
+            <textarea id="message" name="message" rows="4" maxlength="500" aria-describedby="message-hint">{values.message}</textarea>
+          </div>
+        </fieldset>
+
+        <div class="field" id="consentPrivacy">
+          {errors.consentPrivacy && <p class="field__error" id="consentPrivacy-error">{errors.consentPrivacy}</p>}
+          <label class="consent-check">
+            <input type="checkbox" name="consentPrivacy" checked={values.consentPrivacy} required
+                   aria-invalid={errors.consentPrivacy ? 'true' : undefined} aria-describedby={describe('consentPrivacy')} />
+            <span>I agree that {practice.name} may store these details to contact me about an appointment. See the <a href="/privacy">privacy notice</a>.</span>
+          </label>
+        </div>
+
+        <button class="btn btn--primary" type="submit">Send request</button>
+      </form>
+
+      <aside class="booking__aside">
+        {practice.freeConsultation.offered && (
+          <div class="card">
+            <h2>Free first consultation</h2>
+            <p>{practice.freeConsultation.note}</p>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Progressive enhancement only: the form works without JS.
+  const summary = document.getElementById('error-summary');
+  summary?.focus();
+  const src = document.getElementById('source') as HTMLInputElement | null;
+  if (src) src.value = (document.referrer || '').slice(0, 300);
+  const guardian = document.querySelector<HTMLElement>('[data-show-if-minor]');
+  const sync = () => {
+    const minor = (document.querySelector('input[name="patientIsMinor"]:checked') as HTMLInputElement | null)?.value;
+    if (guardian) guardian.hidden = minor === 'no';
+  };
+  document.querySelectorAll('input[name="patientIsMinor"]').forEach((r) => r.addEventListener('change', sync));
+  sync();
+</script>
+
+<style>
+  .booking { display: grid; gap: var(--space-4); align-items: start; }
+  @media (min-width: 960px) { .booking { grid-template-columns: 2fr 1fr; } .error-summary { grid-column: 1 / -1; } }
+  .form { padding: var(--space-4) var(--space-3); }
+  fieldset { border: 0; padding: 0; margin: 0 0 var(--space-3); min-width: 0; }
+  .form > fieldset > legend { font-size: var(--step-2); font-weight: 700; margin-bottom: var(--space-2); }
+  .field { margin-bottom: var(--space-3); }
+  .field > label, .field > legend { display: block; font-weight: 700; margin-bottom: 0.35rem; }
+  .field__hint { color: var(--color-muted); margin-bottom: 0.35rem; font-size: var(--step--1); }
+  .field__error { color: var(--color-error); font-weight: 700; margin-bottom: 0.35rem; }
+  input[type='text'], input[type='tel'], input[type='email'], select, textarea {
+    width: 100%; min-height: 48px; padding: 0.6rem 0.8rem; font: inherit; color: var(--color-text);
+    background: #fff; border: 2px solid var(--color-border); border-radius: var(--radius-sm);
+  }
+  [aria-invalid='true'] { border-color: var(--color-error) !important; }
+  .choices { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+  .choices label, .consent-check { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; cursor: pointer; }
+  .consent-check { align-items: flex-start; font-weight: 400 !important; }
+  input[type='radio'], input[type='checkbox'] { width: 1.3rem; height: 1.3rem; accent-color: var(--color-primary); flex: none; margin-top: 0.15rem; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .error-summary { border: 3px solid var(--color-error); background: #fff; border-radius: var(--radius); padding: var(--space-3); }
+  .error-summary h2 { font-size: var(--step-2); color: var(--color-error); }
+  .error-summary a { color: var(--color-error); font-weight: 700; }
+  .booking__aside h2 { font-size: var(--step-1); }
+</style>

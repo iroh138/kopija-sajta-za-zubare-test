@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { practice } from '../lib/practice';
+---
+<Base title="Privacy" description={`How ${practice.name} handles information sent through this website.`}>
+  <PageHeader title="Privacy" />
+  <section class="section section--surface">
+    <div class="container prose">
+      <p><strong>Placeholder — this page must be written or reviewed by the practice's legal adviser before launch.</strong></p>
+      <h2>Appointment requests</h2>
+      <p>When you request an appointment we store your name, contact details, preferred times and the short note you write, so we can contact you. Please do not include medical details in the form; we discuss those in person or by phone.</p>
+      <h2>Analytics</h2>
+      <p>Analytics cookies load only if you accept them in the cookie banner. You can change your choice by clearing this site's data in your browser.</p>
+      <h2>Contact</h2>
+      <p>Questions about your data: <a href={`mailto:${practice.email}`}>{practice.email}</a>.</p>
+    </div>
+  </section>
+</Base>

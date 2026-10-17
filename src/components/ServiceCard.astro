@@ -1,0 +1,22 @@
+---
+interface Props { title: string; summary: string; href: string; headingLevel?: 'h2' | 'h3' }
+const { title, summary, href, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+---
+<article class="card service-card">
+  <H class="service-card__title"><a href={href}>{title}</a></H>
+  <p>{summary}</p>
+  <span class="service-card__more" aria-hidden="true">Learn more →</span>
+</article>
+<style>
+  .service-card { position: relative; display: flex; flex-direction: column; transition: box-shadow 150ms ease, transform 150ms ease; }
+  .service-card:hover { box-shadow: 0 6px 24px rgb(15 23 42 / 0.12); transform: translateY(-2px); }
+  .service-card__title { font-size: var(--step-1); }
+  .service-card__title a { color: var(--color-text); text-decoration: none; }
+  /* Whole card is clickable via the heading link's ::after */
+  .service-card__title a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
+  .service-card__title a:focus-visible { outline: none; }
+  .service-card__title a:focus-visible::after { outline: var(--focus-ring); outline-offset: 3px; }
+  .service-card p { color: var(--color-muted); flex: 1; }
+  .service-card__more { font-weight: 700; color: var(--color-primary); }
+</style>

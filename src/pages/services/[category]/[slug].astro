@@ -1,0 +1,89 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import ServiceCard from '../../../components/ServiceCard.astro';
+import { breadcrumbJsonLd, faqJsonLd } from '../../../lib/schema';
+import { practice } from '../../../lib/practice';
+
+export async function getStaticPaths() {
+  const services = await getCollection('services');
+  return services.map((s) => ({ params: { category: s.data.category.id, slug: s.id }, props: { service: s } }));
+}
+
+const { service } = Astro.props;
+const category = await getEntry(service.data.category);
+if (!category) throw new Error(`Unknown category for ${service.id}`);
+const { Content } = await render(service);
+const related = (await getCollection('services'))
+  .filter((s) => s.data.category.id === category.id && s.id !== service.id)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Services', path: '/services' },
+  { name: category.data.name, path: `/services/${category.id}` },
+  { name: service.data.title, path: `/services/${category.id}/${service.id}` },
+];
+const site = Astro.site ?? new URL(Astro.url.origin);
+const procedure = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalProcedure',
+  name: service.data.title,
+  description: service.data.summary,
+  url: new URL(`/services/${category.id}/${service.id}`, site).href,
+  provider: { '@id': new URL('/#practice', site).href },
+};
+---
+<Base
+  title={service.data.seoTitle ?? `${service.data.title} in ${practice.address.city}, ${practice.address.region}`}
+  description={service.data.seoDescription ?? service.data.summary.slice(0, 158)}
+  jsonLd={[breadcrumbJsonLd(site, crumbs), procedure, faqJsonLd(service.data.faqs)]}
+>
+  <PageHeader title={service.data.title} lead={service.data.summary} crumbs={crumbs}>
+    <div class="btn-row" style="margin-top: var(--space-2)">
+      <a class="btn btn--primary" href={`/book?service=${service.id}`}>Book a consultation</a>
+      <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call {practice.phone.display}</a>
+    </div>
+  </PageHeader>
+
+  <section class="section section--surface">
+    <div class="container prose">
+      {service.data.image && (
+        <img src={service.data.image.src} alt={service.data.image.decorative ? '' : service.data.image.alt}
+             width={service.data.image.width} height={service.data.image.height} loading="lazy" />
+      )}
+      <Content />
+    </div>
+  </section>
+
+  {service.data.faqs.length > 0 && (
+    <section class="section" aria-labelledby="faq-h">
+      <div class="container prose">
+        <h2 id="faq-h">Common questions</h2>
+        {service.data.faqs.map((f) => (
+          <details class="faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section section--muted" aria-labelledby="related-h">
+      <div class="container">
+        <h2 id="related-h">Related in {category.data.name}</h2>
+        <div class="grid grid--3">
+          {related.map((s) => <ServiceCard title={s.data.title} summary={s.data.summary} href={`/services/${category.id}/${s.id}`} />)}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+<style>
+  .faq { background: var(--color-surface); border-radius: var(--radius-sm); padding: 0 var(--space-2); margin-bottom: var(--space-1); box-shadow: var(--shadow); }
+  .faq summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+  .faq p { padding-bottom: var(--space-2); margin: 0; }
+</style>

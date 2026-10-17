@@ -1,0 +1,53 @@
+---
+/**
+ * Analytics load only after explicit consent (spec 6.5).
+ * Renders nothing unless PUBLIC_GTM_ID is set at build time.
+ */
+const gtmId = import.meta.env.PUBLIC_GTM_ID as string | undefined;
+---
+{gtmId && (
+  <div id="consent" class="consent" role="region" aria-label="Cookie consent" hidden data-gtm={gtmId}>
+    <p>We use analytics cookies to understand how the site is used. Nothing is loaded unless you agree. <a href="/privacy">Privacy</a></p>
+    <div class="btn-row">
+      <button type="button" class="btn btn--primary" data-consent="granted">Accept analytics</button>
+      <button type="button" class="btn btn--secondary" data-consent="denied">Decline</button>
+    </div>
+  </div>
+)}
+{gtmId && (
+  <script>
+    const el = document.getElementById('consent');
+    const KEY = 'analytics-consent';
+    const id = el?.dataset.gtm;
+    function read() { try { return localStorage.getItem(KEY); } catch { return null; } }
+    function write(v: string) { try { localStorage.setItem(KEY, v); } catch { /* storage blocked */ } }
+    function loadGtm() {
+      if (!id || (window as any).__gtmLoaded) return;
+      (window as any).__gtmLoaded = true;
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(id)}`;
+      document.head.appendChild(s);
+    }
+    const choice = read();
+    if (choice === 'granted') loadGtm();
+    else if (choice !== 'denied' && el) el.hidden = false;
+    el?.addEventListener('click', (e) => {
+      const v = (e.target as HTMLElement).closest('button')?.dataset.consent;
+      if (!v) return;
+      write(v);
+      el.hidden = true;
+      if (v === 'granted') loadGtm();
+    });
+  </script>
+)}
+<style>
+  .consent {
+    position: fixed; z-index: 60; left: 1rem; right: 1rem; bottom: 5.5rem; max-width: 34rem;
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+    padding: var(--space-2); box-shadow: var(--shadow);
+  }
+  @media (min-width: 1024px) { .consent { bottom: 1rem; } }
+</style>
