@@ -1,41 +1,59 @@
-@import '@fontsource/atkinson-hyperlegible/400.css';
-@import '@fontsource/atkinson-hyperlegible/700.css';
+@import '@fontsource/jost/300.css';
+@import '@fontsource/jost/400.css';
+@import '@fontsource/jost/500.css';
+@import '@fontsource/jost/600.css';
 
-/* Design tokens (spec 6.3). Contrast ratios were checked with the WCAG formula. */
+/*
+ * Design tokens. Layout language follows the analysed site (airy whitespace, thin large headings,
+ * pill buttons, arched/curved photos); the colour is our own lavender.
+ * Contrast (WCAG): accent text #7c5cc4 on white 5.02:1 · ink on lavender button 7.85:1 · ink on white 17.2:1.
+ */
 :root {
-  --color-primary: #0e7490;        /* white text 5.36:1 */
-  --color-primary-hover: #155e75;
-  --color-on-primary: #ffffff;
-  --color-accent: #047857;         /* white text 5.48:1 */
-  --color-on-accent: #ffffff;
-  --color-bg: #ecfeff;
+  --color-ink: #1e1633;
+  --color-text: #2b2440;
+  --color-muted: #5b5370;
+  --color-accent: #7c5cc4;        /* headings, links */
+  --color-accent-strong: #6b4bb3; /* hover */
+  --color-lavender: #b8a4ec;      /* filled buttons, carousel arrows */
+  --color-lavender-hover: #a991e6;
+  --color-tint: #f6f2fd;
+  --color-tint-2: #ede6fb;
+  --color-card: #f5f4f8;
   --color-surface: #ffffff;
-  --color-text: #164e63;           /* on bg 8.76:1 */
-  --color-muted: #475569;
-  --color-surface-muted: #e8f1f6;
-  --color-border: #64748b;         /* input borders, >= 3:1 */
-  --color-divider: #cbd5e1;        /* decorative lines only */
-  --color-error: #b91c1c;
-  --focus-ring: 3px solid #0e7490;
+  --color-bg: #ffffff;
+  --color-border: #1e1633;        /* outline buttons */
+  --color-divider: #e4def2;
+  --color-star: #f5b301;
+  --color-error: #b42318;
+  --focus-ring: 3px solid #6b4bb3;
 
-  --font: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --step--1: 0.9375rem;
+  --font: 'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --step--1: 0.95rem;
   --step-0: 1.0625rem;
-  --step-1: 1.3rem;
-  --step-2: 1.65rem;
-  --step-3: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
-  --step-4: clamp(2.2rem, 1.5rem + 3vw, 3.4rem);
+  --step-1: 1.35rem;
+  --step-2: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+  --step-3: clamp(2.1rem, 1.5rem + 2.4vw, 3.4rem);
+  --step-4: clamp(2.6rem, 1.6rem + 3.6vw, 4.6rem);
 
   --space-1: 0.5rem;
   --space-2: 1rem;
   --space-3: 1.5rem;
   --space-4: 2.5rem;
-  --space-5: 4rem;
-  --space-6: 6rem;
-  --radius: 14px;
+  --space-5: 4.5rem;
+  --space-6: 7rem;
+  --radius: 4px;
   --radius-sm: 8px;
-  --container: 72rem;
-  --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 4px 16px rgb(15 23 42 / 0.06);
+  --container: 100rem;
+  --gutter: clamp(1rem, 7vw, 9.5rem);
+  /* left edge of .container, for sections whose media bleeds to the viewport edge */
+  --edge: max(var(--gutter), calc((100vw - var(--container)) / 2));
+  --shadow: 0 1px 2px rgb(30 22 51 / 0.05), 0 8px 24px rgb(30 22 51 / 0.06);
+
+  /* aliases used by older components */
+  --color-primary: var(--color-accent);
+  --color-primary-hover: var(--color-accent-strong);
+  --color-on-primary: var(--color-ink);
+  --color-surface-muted: var(--color-tint);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -44,27 +62,33 @@ body {
   margin: 0;
   font-family: var(--font);
   font-size: var(--step-0);
-  line-height: 1.6;
+  font-weight: 400;
+  line-height: 1.75;
   color: var(--color-text);
   background: var(--color-bg);
 }
 img, svg, video { display: block; max-width: 100%; height: auto; }
-h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--space-2); text-wrap: balance; }
-h1 { font-size: var(--step-4); }
+h1, h2, h3 { font-weight: 300; line-height: 1.2; margin: 0 0 var(--space-3); color: var(--color-accent); text-wrap: balance; letter-spacing: -0.005em; }
+h1 { font-size: var(--step-4); line-height: 1.22; }
 h2 { font-size: var(--step-3); }
-h3 { font-size: var(--step-1); }
-p { margin: 0 0 var(--space-2); max-width: 65ch; }
-a { color: var(--color-primary); text-underline-offset: 0.18em; }
-a:hover { color: var(--color-primary-hover); }
+h3 { font-size: var(--step-2); margin-bottom: var(--space-1); }
+p { margin: 0 0 var(--space-3); max-width: 68ch; }
+strong { font-weight: 600; }
+a { color: var(--color-accent); text-underline-offset: 0.18em; }
+a:hover { color: var(--color-accent-strong); }
 :focus-visible { outline: var(--focus-ring); outline-offset: 3px; border-radius: 4px; }
 
-.container { width: min(100% - 2rem, var(--container)); margin-inline: auto; }
+.container { width: min(100% - 2 * var(--gutter), var(--container)); margin-inline: auto; }
+@media (max-width: 640px) { .container { width: calc(100% - 2rem); } :root { --edge: 1rem; } }
 .section { padding-block: var(--space-5); }
+@media (min-width: 900px) { .section { padding-block: var(--space-6); } }
 .section--surface { background: var(--color-surface); }
-.section--muted { background: var(--color-surface-muted); }
-.eyebrow { font-size: var(--step--1); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent); margin-bottom: var(--space-1); }
-.lead { font-size: var(--step-1); color: var(--color-text); }
+.section--muted, .section--tint { background: var(--color-tint); }
+.eyebrow { font-size: var(--step--1); font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent); margin-bottom: var(--space-1); }
+.lead { font-size: var(--step-1); font-weight: 300; }
 .muted { color: var(--color-muted); }
+.text-link { font-weight: 600; text-decoration: none; }
+.text-link:hover { text-decoration: underline; }
 .visually-hidden {
   position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
@@ -72,32 +96,45 @@ a:hover { color: var(--color-primary-hover); }
 .skip-link { position: absolute; left: 1rem; top: -4rem; z-index: 100; background: var(--color-surface); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
 .skip-link:focus { top: 1rem; }
 
-/* Buttons: min 44px touch target */
+/* Pill buttons: min 44px touch target */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  min-height: 44px; padding: 0.7rem 1.25rem; border-radius: 999px;
-  font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
-  border: 2px solid var(--color-primary); transition: background-color 150ms ease, color 150ms ease;
+  min-height: 52px; padding: 0.7rem 1.75rem; border-radius: 999px;
+  font: inherit; font-size: 1.1rem; font-weight: 400; text-decoration: none; cursor: pointer; text-align: center;
+  border: 1.5px solid var(--color-border); transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
-.btn--primary { background: var(--color-primary); color: var(--color-on-primary); }
-.btn--primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); color: var(--color-on-primary); }
-.btn--secondary { background: transparent; color: var(--color-primary); }
-.btn--secondary:hover { background: var(--color-surface); }
+.btn--primary { background: var(--color-lavender); color: var(--color-ink); border-color: var(--color-ink); }
+.btn--primary:hover { background: var(--color-lavender-hover); color: var(--color-ink); }
+.btn--secondary, .btn--outline { background: transparent; color: var(--color-ink); }
+.btn--secondary:hover, .btn--outline:hover { background: var(--color-tint-2); color: var(--color-ink); }
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
+/* Round icon button (carousels) */
+.round-btn {
+  width: 60px; height: 60px; border-radius: 50%; border: 0; display: inline-grid; place-items: center;
+  background: var(--color-lavender); color: var(--color-ink); cursor: pointer; transition: background-color 150ms ease, opacity 150ms ease;
+}
+.round-btn:hover { background: var(--color-lavender-hover); }
+.round-btn[disabled] { opacity: 0.4; cursor: default; }
+.round-btn svg { width: 22px; height: 22px; }
+
 .card {
-  background: var(--color-surface); border-radius: var(--radius); padding: var(--space-3);
+  background: var(--color-surface); border-radius: var(--radius-sm); padding: var(--space-3);
   box-shadow: var(--shadow); height: 100%;
 }
 .grid { display: grid; gap: var(--space-3); }
 .grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
 .grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
 
+/* Photo shapes */
+.arch { border-radius: 999px 999px 0 0; overflow: hidden; }
+.arch img { width: 100%; height: 100%; object-fit: cover; }
+
 .prose { max-width: 70ch; }
 .prose h2 { font-size: var(--step-2); margin-top: var(--space-4); }
 
-.hours-table { border-collapse: collapse; width: 100%; max-width: 26rem; }
-.hours-table th, .hours-table td { text-align: left; padding: 0.35rem 0; border-bottom: 1px solid var(--color-divider); font-weight: 400; }
+.hours-table { border-collapse: collapse; width: 100%; max-width: 30rem; }
+.hours-table th, .hours-table td { text-align: left; padding: 0.3rem 0; border-bottom: 1px solid var(--color-divider); font-weight: 300; }
 .hours-table th { padding-right: var(--space-2); }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,59 +1,74 @@
 ---
 import { url } from '../lib/url';
 import { getCollection } from 'astro:content';
-import { practice, addressLine } from '../lib/practice';
-import HoursTable from './HoursTable.astro';
+import { practice, addressLine, hoursRows, upcomingSpecialDates } from '../lib/practice';
+import Logo from './Logo.astro';
+import SocialIcons from './SocialIcons.astro';
 
 const categories = (await getCollection('categories')).sort((a, b) => a.data.order - b.data.order);
+const hours = hoursRows();
+const nextSpecial = upcomingSpecialDates().find((d) => !d.closed);
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
-  <div class="container site-footer__grid">
-    <div>
-      <p class="site-footer__name">{practice.name}</p>
-      <address>
-        <a href={practice.mapsUrl} data-nap="address">{addressLine()}</a><br />
-        <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a><br />
-        <a href={`mailto:${practice.email}`}>{practice.email}</a>
-      </address>
-      {practice.social.length > 0 && (
-        <ul class="social" aria-label="Social profiles">
-          {practice.social.map((s) => <li><a href={s.url} rel="noopener">{s.network}</a></li>)}
+  <div class="container">
+    <a href={url("/")} class="site-footer__logo"><Logo size="lg" /></a>
+
+    <div class="site-footer__grid">
+      <div class="site-footer__info">
+        <div>
+          <h2 class="site-footer__label">Address:</h2>
+          <p><a href={practice.mapsUrl} data-nap="address">{addressLine()}</a></p>
+        </div>
+        <div>
+          <h2 class="site-footer__label">Office hours:</h2>
+          <ul class="hours-list" data-nap="hours">
+            {hours.map((h) => <li>{h.day}: {h.text.replace(' – ', ' to ')}</li>)}
+          </ul>
+          {nextSpecial && <p class="muted">Next Saturday clinic: {nextSpecial.pretty}, {nextSpecial.text.replace(' – ', ' to ')}.</p>}
+        </div>
+        <div>
+          <h2 class="site-footer__label">Contact:</h2>
+          <p>
+            <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a><br />
+            <a href={`mailto:${practice.email}`}>{practice.email}</a>
+          </p>
+        </div>
+        <SocialIcons />
+      </div>
+
+      <nav class="site-footer__nav" aria-label="Footer">
+        <ul>
+          <li><a href={url('/')}>Home</a></li>
+          <li><a href={url('/about')}>About</a></li>
+          <li><a href={url('/patient-info')}>Patient info</a></li>
+          <li><a href={url('/contact')}>Contact</a></li>
+          <li><a href={url('/privacy')}>Privacy</a></li>
         </ul>
-      )}
+        <ul>
+          <li><a href={url('/services')}>Services</a></li>
+          {categories.map((c) => <li><a href={url(`/services/${c.id}`)}>{c.data.name}</a></li>)}
+        </ul>
+      </nav>
     </div>
-    <div>
-      <h2 class="site-footer__heading">Hours</h2>
-      <HoursTable showSpecial={false} caption="Opening hours (footer)" />
-    </div>
-    <nav aria-label="Footer">
-      <h2 class="site-footer__heading">Explore</h2>
-      <ul class="links">
-        <li><a href={url('/services')}>All services</a></li>
-        {categories.map((c) => <li><a href={url(`/services/${c.id}`)}>{c.data.name}</a></li>)}
-        <li><a href={url('/about')}>About</a></li>
-        <li><a href={url('/patient-info')}>Patient info</a></li>
-        <li><a href={url('/contact')}>Contact</a></li>
-        <li><a href={url('/privacy')}>Privacy</a></li>
-      </ul>
-    </nav>
-  </div>
-  <div class="container site-footer__bottom">
-    <p>© {year} {practice.name}. All rights reserved.</p>
+
+    <p class="site-footer__copy">© {year} {practice.name}. All rights reserved.</p>
   </div>
 </footer>
 <style>
-  .site-footer { background: #0b3a4a; color: #e0f2fe; padding-block: var(--space-5) var(--space-3); margin-bottom: 4.5rem; }
+  .site-footer { background: linear-gradient(180deg, #ffffff 0%, var(--color-tint) 45%, var(--color-tint-2) 100%); padding-block: var(--space-6) var(--space-3); margin-bottom: 4.75rem; }
   @media (min-width: 1024px) { .site-footer { margin-bottom: 0; } }
-  .site-footer a { color: #e0f2fe; }
-  .site-footer a:hover { color: #ffffff; }
-  .site-footer :focus-visible { outline-color: #ffffff; }
-  .site-footer__grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
-  .site-footer__name { font-weight: 700; font-size: var(--step-1); }
-  .site-footer__heading { font-size: var(--step-0); text-transform: uppercase; letter-spacing: 0.06em; }
-  address { font-style: normal; line-height: 1.9; }
-  .social, .links { list-style: none; padding: 0; margin: var(--space-2) 0 0; line-height: 2.1; }
-  .social { display: flex; gap: var(--space-2); }
-  .site-footer :global(.hours-table th), .site-footer :global(.hours-table td) { border-color: #1e5b6e; }
-  .site-footer__bottom { border-top: 1px solid #1e5b6e; margin-top: var(--space-4); padding-top: var(--space-2); font-size: var(--step--1); }
+  .site-footer a { color: var(--color-ink); text-decoration: none; }
+  .site-footer a:hover { color: var(--color-accent); text-decoration: underline; }
+  .site-footer__logo { display: inline-block; margin-bottom: var(--space-4); }
+  .site-footer__grid { display: grid; gap: var(--space-4); }
+  @media (min-width: 1024px) { .site-footer__grid { grid-template-columns: 1.4fr 1fr; } }
+  .site-footer__info { display: grid; gap: var(--space-3); }
+  .site-footer__info p { margin-bottom: 0; }
+  .site-footer__label { font-size: var(--step-0); font-weight: 600; color: var(--color-ink); margin-bottom: 0.4rem; }
+  .hours-list { list-style: none; padding: 0; margin: 0 0 0.5rem; font-weight: 300; line-height: 1.9; }
+  .site-footer__nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); align-content: start; }
+  .site-footer__nav ul { list-style: none; padding: 0; margin: 0; }
+  .site-footer__nav a { display: inline-flex; min-height: 44px; align-items: center; font-weight: 300; }
+  .site-footer__copy { margin-top: var(--space-5); padding-top: var(--space-2); border-top: 1px solid var(--color-divider); font-size: var(--step--1); color: var(--color-muted); max-width: none; }
 </style>

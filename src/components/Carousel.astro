@@ -1,0 +1,78 @@
+---
+/**
+ * Accessible scroll-snap carousel: no autoplay, works by swipe/scroll without JS,
+ * prev/next buttons and optional dots are progressive enhancement.
+ */
+interface Props { label: string; dots?: boolean; controlsAlign?: 'start' | 'end' | 'split' }
+const { label, dots = false, controlsAlign = 'start' } = Astro.props;
+---
+<div class="carousel" data-carousel role="region" aria-roledescription="carousel" aria-label={label}>
+  <ul class="carousel__track" tabindex="0">
+    <slot />
+  </ul>
+  <div class:list={['carousel__controls', `carousel__controls--${controlsAlign}`]}>
+    {dots && <div class="carousel__dots" data-dots aria-hidden="true"></div>}
+    <div class="carousel__buttons">
+      <button type="button" class="round-btn" data-prev aria-label="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </button>
+      <button type="button" class="round-btn" data-next aria-label="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <p class="visually-hidden" aria-live="polite" data-status></p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('.carousel__track')!;
+    const slides = Array.from(track.children) as HTMLElement[];
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+    const dotsEl = root.querySelector<HTMLElement>('[data-dots]');
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    slides.forEach((s, i) => { s.setAttribute('aria-roledescription', 'slide'); s.setAttribute('aria-label', `${i + 1} of ${slides.length}`); });
+    const dots = slides.map(() => { const d = document.createElement('span'); dotsEl?.appendChild(d); return d; });
+
+    const step = () => (slides[1] ? slides[1].offsetLeft - slides[0].offsetLeft : track.clientWidth);
+    const current = () => Math.round(track.scrollLeft / step());
+    const update = () => {
+      const i = current();
+      const max = track.scrollWidth - track.clientWidth - 2;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max;
+      dots.forEach((d, j) => d.classList.toggle('is-active', j === i));
+      status.textContent = `Showing item ${Math.min(i + 1, slides.length)} of ${slides.length}`;
+    };
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const go = (dir: number) => track.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    });
+    let t: number | undefined;
+    track.addEventListener('scroll', () => { clearTimeout(t); t = window.setTimeout(update, 60); }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  });
+</script>
+
+<style>
+  .carousel__track {
+    list-style: none; margin: 0; padding: 0 0 4px; display: grid; grid-auto-flow: column; gap: var(--carousel-gap, 1.25rem);
+    grid-auto-columns: var(--slide-width, 85%); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    scrollbar-width: none; overscroll-behavior-x: contain;
+  }
+  .carousel__track::-webkit-scrollbar { display: none; }
+  .carousel__track > :global(*) { scroll-snap-align: start; }
+  .carousel__controls { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+  .carousel__controls--end { justify-content: flex-end; }
+  .carousel__controls--split { justify-content: space-between; }
+  .carousel__buttons { display: flex; gap: 1.25rem; }
+  .carousel__dots { display: flex; gap: 8px; }
+  .carousel__dots :global(span) { width: 10px; height: 10px; border-radius: 50%; background: var(--color-tint-2); }
+  .carousel__dots :global(span.is-active) { background: var(--color-accent); }
+</style>

@@ -8,7 +8,7 @@ const practice = JSON.parse(readFileSync('src/data/practice.json', 'utf8'));
 const phone = practice.phone.e164;
 
 // Strings from the analysed source site that must never appear in this build.
-const FORBIDDEN = ['Airily', 'airily', 'Zoga', 'Demergis', 'Moorestown', '242-2111', '242-1660', 'Breathe. Smile', 'Lasso'];
+const FORBIDDEN = ['Airily', 'airily', 'Zoga', 'Demergis', 'Moorestown', 'Lenola', '242-2111', '242-1660', '263-3094', 'Breathe Better', 'Breathe. Smile', 'Thrive for Life', 'Smile Solutions That Go Beyond', 'Not Sure Where to Start', 'Specialized, High-Tech', 'Lasso', 'MARPE'];
 
 const problems = [];
 

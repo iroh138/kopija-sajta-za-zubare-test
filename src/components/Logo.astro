@@ -1,0 +1,31 @@
+---
+/** Placeholder wordmark built from practice.name ("Sample Orthodontics" → "Sample" + ORTHODONTICS). Replace with the client's logo. */
+import { practice } from '../lib/practice';
+interface Props { size?: 'md' | 'lg' }
+const { size = 'md' } = Astro.props;
+const words = practice.name.trim().split(/\s+/);
+const secondary = words.length > 1 ? words.pop()! : '';
+const primary = words.join(' ');
+---
+<span class:list={['logo', `logo--${size}`]}>
+  <svg class="logo__mark" viewBox="0 0 48 56" aria-hidden="true" focusable="false">
+    <path d="M24 6c-6-5-17-4-19 6-2 9 3 15 5 24 2 8 3 16 7 16 5 0 3-14 7-14s2 14 7 14c4 0 5-8 7-16 2-9 7-15 5-24-2-10-13-11-19-6z"
+          fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+    <path d="M14 18c4 3 16 3 20 0" fill="none" stroke="var(--color-accent)" stroke-width="2.2" stroke-linecap="round" />
+  </svg>
+  <span class="logo__text">
+    <span class="logo__primary">{primary}</span>
+    {secondary && <span class="logo__secondary">{secondary}</span>}
+  </span>
+</span>
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.7rem; color: var(--color-ink); }
+  .logo__mark { width: 2.4rem; height: auto; flex: none; }
+  .logo__text { display: flex; flex-direction: column; line-height: 1; }
+  .logo__primary { font-size: 1.9rem; font-weight: 300; letter-spacing: 0.01em; }
+  .logo__secondary { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase; margin-top: 0.35rem; }
+  .logo--lg .logo__mark { width: 3.2rem; }
+  .logo--lg .logo__primary { font-size: 2.5rem; }
+  .logo--lg .logo__secondary { font-size: 0.85rem; }
+  @media (max-width: 420px) { .logo__primary { font-size: 1.5rem; } .logo__mark { width: 2rem; } }
+</style>
