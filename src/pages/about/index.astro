@@ -1,4 +1,5 @@
 ---
+import { url } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import { practice } from '../../lib/practice';
@@ -18,8 +19,8 @@ const site = Astro.site ?? new URL(Astro.url.origin);
       <h2>Who we see</h2>
       <p>Children from about age 7, teenagers and adults. Patients come from {practice.serviceAreas.join(', ')}.</p>
       <div class="btn-row">
-        <a class="btn btn--primary" href="/book">Book a visit</a>
-        <a class="btn btn--secondary" href="/about/team">Meet the team</a>
+        <a class="btn btn--primary" href={url('/book')}>Book a visit</a>
+        <a class="btn btn--secondary" href={url('/about/team')}>Meet the team</a>
       </div>
     </div>
   </section>

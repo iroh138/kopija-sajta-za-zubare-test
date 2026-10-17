@@ -1,4 +1,6 @@
 ---
+import { url, IS_STATIC_PREVIEW } from '../../lib/url';
+// Server-rendered. The static GitHub Pages preview prerenders it instead (see astro.config.mjs).
 export const prerender = false;
 
 import { getCollection } from 'astro:content';
@@ -21,7 +23,7 @@ let formError = '';
 const requested = Astro.url.searchParams.get('service');
 if (requested && serviceIds.includes(requested)) values.service = requested;
 
-if (Astro.request.method === 'POST') {
+if (!IS_STATIC_PREVIEW && Astro.request.method === 'POST') {
   let ip = 'unknown';
   try { ip = Astro.clientAddress; } catch { /* not available behind some proxies */ }
   const form = await Astro.request.formData();
@@ -29,7 +31,7 @@ if (Astro.request.method === 'POST') {
   values = parsed.values;
   errors = parsed.errors;
 
-  if (parsed.isBot) return Astro.redirect('/book/thanks', 303);
+  if (parsed.isBot) return Astro.redirect(url('/book/thanks'), 303);
   // Only complete submissions count toward the limit, so a visitor fixing typos is never locked out.
   if (Object.keys(errors).length === 0 && rateLimited(ip)) {
     Astro.response.status = 429;
@@ -51,7 +53,7 @@ if (Astro.request.method === 'POST') {
         source: form.get('source')?.toString().slice(0, 300) || Astro.request.headers.get('referer')?.slice(0, 300) || null,
       });
       await notifyPractice({ id, preferred_contact: values.preferredContact, patient_type: values.patientType }, practice.name);
-      return Astro.redirect('/book/thanks', 303);
+      return Astro.redirect(url('/book/thanks'), 303);
     } catch (err) {
       console.error('[booking] could not store request', err);
       Astro.response.status = 500;
@@ -86,7 +88,7 @@ const describe = (field: string) => (errors as Record<string, string>)[field] ? 
         </div>
       )}
 
-      <form method="post" action="/book" class="card form" novalidate>
+      <form method="post" action={url('/book')} class="card form" novalidate>
         <input type="hidden" name="source" value="" id="source" />
         <div class="hp" aria-hidden="true">
           <label for="website">Leave this field empty</label>
@@ -179,11 +181,12 @@ const describe = (field: string) => (errors as Record<string, string>)[field] ? 
           <label class="consent-check">
             <input type="checkbox" name="consentPrivacy" checked={values.consentPrivacy} required
                    aria-invalid={errors.consentPrivacy ? 'true' : undefined} aria-describedby={describe('consentPrivacy')} />
-            <span>I agree that {practice.name} may store these details to contact me about an appointment. See the <a href="/privacy">privacy notice</a>.</span>
+            <span>I agree that {practice.name} may store these details to contact me about an appointment. See the <a href={url('/privacy')}>privacy notice</a>.</span>
           </label>
         </div>
 
-        <button class="btn btn--primary" type="submit">Send request</button>
+        {IS_STATIC_PREVIEW && <p class="field__error">Online booking is disabled in this preview. Please call instead.</p>}
+        <button class="btn btn--primary" type="submit" disabled={IS_STATIC_PREVIEW}>Send request</button>
       </form>
 
       <aside class="booking__aside">

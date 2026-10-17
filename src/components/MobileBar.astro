@@ -1,9 +1,10 @@
 ---
+import { url } from '../lib/url';
 import { practice } from '../lib/practice';
 ---
 <div class="mobile-bar" role="region" aria-label="Quick actions">
   <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call</a>
-  <a class="btn btn--primary" href="/book">Book a visit</a>
+  <a class="btn btn--primary" href={url('/book')}>Book a visit</a>
 </div>
 <style>
   .mobile-bar {

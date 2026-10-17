@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 interface Props { title: string; lead?: string; crumbs?: { name: string; path: string }[] }
 const { title, lead, crumbs = [] } = Astro.props;
 ---
@@ -8,7 +9,7 @@ const { title, lead, crumbs = [] } = Astro.props;
       <nav aria-label="Breadcrumb">
         <ol class="crumbs">
           {crumbs.map((c, i) => (
-            <li>{i < crumbs.length - 1 ? <a href={c.path}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>
+            <li>{i < crumbs.length - 1 ? <a href={url(c.path)}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>
           ))}
         </ol>
       </nav>

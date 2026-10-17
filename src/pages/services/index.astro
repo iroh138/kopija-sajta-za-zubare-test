@@ -1,4 +1,5 @@
 ---
+import { url } from '../../lib/url';
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
@@ -22,10 +23,10 @@ const site = Astro.site ?? new URL(Astro.url.origin);
     return (
       <section class="section" aria-labelledby={`cat-${c.id}`}>
         <div class="container">
-          <h2 id={`cat-${c.id}`}><a href={`/services/${c.id}`}>{c.data.name}</a></h2>
+          <h2 id={`cat-${c.id}`}><a href={url(`/services/${c.id}`)}>{c.data.name}</a></h2>
           <p class="muted">{c.data.intro}</p>
           <div class="grid grid--3">
-            {items.map((s) => <ServiceCard title={s.data.title} summary={s.data.summary} href={`/services/${c.id}/${s.id}`} />)}
+            {items.map((s) => <ServiceCard title={s.data.title} summary={s.data.summary} href={url(`/services/${c.id}/${s.id}`)} />)}
           </div>
         </div>
       </section>

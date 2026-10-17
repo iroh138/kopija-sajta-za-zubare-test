@@ -1,0 +1,56 @@
+{
+  "name": "Sample Orthodontics",
+  "tagline": "Orthodontic care planned around how you breathe, bite and grow",
+  "specialty": "Orthodontist",
+  "phone": { "display": "(201) 555-0142", "e164": "+12015550142" },
+  "email": "hello@example.com",
+  "address": {
+    "street": "100 Example Avenue",
+    "unit": "Suite 4",
+    "city": "Anytown",
+    "region": "NJ",
+    "postalCode": "00000",
+    "country": "US"
+  },
+  "geo": { "lat": 40.0, "lng": -75.0 },
+  "mapsUrl": "https://www.openstreetmap.org/?mlat=40.00000&mlon=-75.00000#map=17/40.00000/-75.00000",
+  "profileUrl": "",
+  "social": [
+    { "network": "Facebook", "url": "https://www.facebook.com/" },
+    { "network": "Instagram", "url": "https://www.instagram.com/" }
+  ],
+  "acceptingNewPatients": true,
+  "freeConsultation": {
+    "offered": true,
+    "note": "Your first orthodontic consultation is free. We explain what we can and cannot treat, with no obligation."
+  },
+  "hours": [
+    { "day": 1, "opens": "08:45", "closes": "17:00" },
+    { "day": 2, "opens": "08:45", "closes": "17:30" },
+    { "day": 3, "opens": "10:00", "closes": "18:00" },
+    { "day": 4, "closed": true },
+    { "day": 5, "opens": "08:45", "closes": "17:00" },
+    { "day": 6, "closed": true },
+    { "day": 7, "closed": true }
+  ],
+  "specialDates": [
+    { "date": "2026-11-14", "opens": "08:00", "closes": "14:00", "label": "Saturday clinic" },
+    { "date": "2026-12-12", "opens": "08:00", "closes": "14:00", "label": "Saturday clinic" },
+    { "date": "2026-12-24", "closed": true, "label": "Holiday closure" }
+  ],
+  "serviceAreas": ["Anytown", "Riverside", "Hillcrest", "Oak Park", "Lakeview", "Maple Grove"],
+  "insurers": [
+    { "name": "Example Dental Plan A", "accepted": true },
+    { "name": "Example Dental Plan B", "accepted": true }
+  ],
+  "payments": [
+    { "name": "Monthly payment plans", "description": "Spread treatment cost over the length of treatment, interest-free." },
+    { "name": "Cards and HSA/FSA", "description": "Major credit and debit cards and health savings accounts." }
+  ],
+  "reasons": [
+    { "title": "We look for the cause", "body": "We check jaw growth, tongue posture and breathing before we plan tooth movement." },
+    { "title": "We measure, then plan", "body": "3D scans replace guesswork and messy impressions." },
+    { "title": "Earlier can mean simpler", "body": "For growing children, guiding development now can shorten treatment later." },
+    { "title": "A plan that is yours", "body": "You get a written plan with timelines and costs before anything starts." }
+  ]
+}

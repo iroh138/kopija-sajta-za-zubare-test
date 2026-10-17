@@ -20,6 +20,27 @@ npm run build && npm start
 
 Node 22.22+ required (Astro 7).
 
+## Preview on GitHub Pages
+
+Every push to `main` builds a **static preview** with `.github/workflows/pages-preview.yml`
+(`PUBLIC_PREVIEW_STATIC=1`, `BASE_PATH=/<repo>`). Pages cannot run the Node server, so in the preview
+the booking form is shown but disabled, `/admin` shows a notice, and every page is `noindex`.
+Enable once: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+On a private repository, Pages needs a paid GitHub plan (Pro, Team or Enterprise).
+
+To build the preview locally:
+
+```bash
+PUBLIC_PREVIEW_STATIC=1 BASE_PATH=/ortho-clinic-site npx astro build   # output in dist/
+```
+
+Internal links go through `url()` in `src/lib/url.ts` so they work under any base path.
+
+## Audit
+
+With the server running: `CHROME_PATH=/path/to/chrome npm run audit` checks that every sitemap
+URL returns 200, then runs Lighthouse (mobile) and axe-core on key pages.
+
 ## Where things live
 
 | What | File |

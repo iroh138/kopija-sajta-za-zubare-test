@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 import { practice, addressLine } from '../lib/practice';
 import HoursTable from './HoursTable.astro';
 
@@ -24,7 +25,7 @@ const embed = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d}%2
     <h3>Opening hours</h3>
     <HoursTable />
     <div class="btn-row" style="margin-top: var(--space-3)">
-      <a class="btn btn--primary" href="/book">Book a visit</a>
+      <a class="btn btn--primary" href={url('/book')}>Book a visit</a>
       <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call {practice.phone.display}</a>
     </div>
   </div>

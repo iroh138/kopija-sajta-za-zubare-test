@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 import { getCollection } from 'astro:content';
 import { practice, addressLine } from '../lib/practice';
 import HoursTable from './HoursTable.astro';
@@ -28,12 +29,12 @@ const year = new Date().getFullYear();
     <nav aria-label="Footer">
       <h2 class="site-footer__heading">Explore</h2>
       <ul class="links">
-        <li><a href="/services">All services</a></li>
-        {categories.map((c) => <li><a href={`/services/${c.id}`}>{c.data.name}</a></li>)}
-        <li><a href="/about">About</a></li>
-        <li><a href="/patient-info">Patient info</a></li>
-        <li><a href="/contact">Contact</a></li>
-        <li><a href="/privacy">Privacy</a></li>
+        <li><a href={url('/services')}>All services</a></li>
+        {categories.map((c) => <li><a href={url(`/services/${c.id}`)}>{c.data.name}</a></li>)}
+        <li><a href={url('/about')}>About</a></li>
+        <li><a href={url('/patient-info')}>Patient info</a></li>
+        <li><a href={url('/contact')}>Contact</a></li>
+        <li><a href={url('/privacy')}>Privacy</a></li>
       </ul>
     </nav>
   </div>

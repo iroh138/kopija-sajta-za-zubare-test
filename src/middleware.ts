@@ -9,7 +9,8 @@ const safeEqual = (a: string, b: string) => {
 
 /** HTTP Basic auth in front of /admin. Disabled (503) until ADMIN_USER and ADMIN_PASSWORD are set. Use HTTPS in production. */
 export const onRequest = defineMiddleware(async (ctx, next) => {
-  if (!ctx.url.pathname.startsWith('/admin')) return next();
+  if (import.meta.env.PUBLIC_PREVIEW_STATIC === '1' || ctx.isPrerendered) return next();
+  if (!/^\/(.+\/)?admin(\/|$)/.test(ctx.url.pathname)) return next();
 
   const user = process.env.ADMIN_USER;
   const pass = process.env.ADMIN_PASSWORD;

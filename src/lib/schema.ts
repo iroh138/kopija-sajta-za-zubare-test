@@ -1,3 +1,4 @@
+import { abs } from './url';
 import { practice, DAY_NAMES } from './practice';
 
 /** Practice JSON-LD, generated from practice.json so it always matches the visible NAP and hours. */
@@ -25,10 +26,10 @@ export function practiceJsonLd(site: URL) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Dentist',
-    '@id': new URL('/#practice', site).href,
+    '@id': abs('/#practice', site),
     name: p.name,
     slogan: p.tagline,
-    url: site.href,
+    url: abs('/', site),
     telephone: p.phone.e164,
     email: p.email,
     isAcceptingNewPatients: p.acceptingNewPatients,
@@ -61,7 +62,7 @@ export function breadcrumbJsonLd(site: URL, items: { name: string; path: string 
       '@type': 'ListItem',
       position: i + 1,
       name: it.name,
-      item: new URL(it.path, site).href,
+      item: abs(it.path, site),
     })),
   };
 }

@@ -1,25 +1,33 @@
 // Post-build checks for the acceptance criteria in the build spec (section 6.7).
 // Run after `astro build`: node scripts/check-site.mjs
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-const root = 'dist/client';
+const root = existsSync('dist/client') ? 'dist/client' : 'dist';
 const practice = JSON.parse(readFileSync('src/data/practice.json', 'utf8'));
 const phone = practice.phone.e164;
 
 // Strings from the analysed source site that must never appear in this build.
 const FORBIDDEN = ['Airily', 'airily', 'Zoga', 'Demergis', 'Moorestown', '242-2111', '242-1660', 'Breathe. Smile', 'Lasso'];
 
+const problems = [];
+
+// Server build: /book and /admin must stay server-rendered, or the form and the admin login silently stop working.
+if (root === 'dist/client') {
+  for (const p of ['book/index.html', 'admin/index.html']) {
+    if (existsSync(join(root, p))) problems.push(`${p} was prerendered in the server build; it must be server-rendered`);
+  }
+}
+
 const files = [];
 (function walk(dir) {
   for (const f of readdirSync(dir)) {
     const p = join(dir, f);
     if (statSync(p).isDirectory()) walk(p);
-    else if (p.endsWith('.html')) files.push(p);
+    else if (p.endsWith('.html') && !relative(root, p).startsWith('admin')) files.push(p); // /admin is staff-only
   }
 })(root);
 
-const problems = [];
 const titles = new Map();
 const fail = (file, msg) => problems.push(`${relative(root, file)}: ${msg}`);
 

@@ -1,8 +1,11 @@
 import type { APIRoute } from 'astro';
+import { abs, url, IS_STATIC_PREVIEW } from '../lib/url';
 
 export const GET: APIRoute = ({ site }) => {
-  const sitemap = new URL('/sitemap-index.xml', site ?? 'https://www.example.com').href;
-  return new Response(`User-agent: *\nDisallow: /admin\nDisallow: /book/thanks\n\nSitemap: ${sitemap}\n`, {
+  const sitemap = abs('/sitemap-index.xml', site ?? 'https://www.example.com');
+  // The static preview is placeholder content: keep it out of search engines entirely.
+  const rules = IS_STATIC_PREVIEW ? 'Disallow: /' : `Disallow: ${url('/admin')}\nDisallow: ${url('/book/thanks')}`;
+  return new Response(`User-agent: *\n${rules}\n\nSitemap: ${sitemap}\n`, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 };

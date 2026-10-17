@@ -1,4 +1,5 @@
 ---
+import { url, abs } from '../../../lib/url';
 import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import PageHeader from '../../../components/PageHeader.astro';
@@ -31,8 +32,8 @@ const procedure = {
   '@type': 'MedicalProcedure',
   name: service.data.title,
   description: service.data.summary,
-  url: new URL(`/services/${category.id}/${service.id}`, site).href,
-  provider: { '@id': new URL('/#practice', site).href },
+  url: abs(`/services/${category.id}/${service.id}`, site),
+  provider: { '@id': abs('/#practice', site) },
 };
 ---
 <Base
@@ -42,7 +43,7 @@ const procedure = {
 >
   <PageHeader title={service.data.title} lead={service.data.summary} crumbs={crumbs}>
     <div class="btn-row" style="margin-top: var(--space-2)">
-      <a class="btn btn--primary" href={`/book?service=${service.id}`}>Book a consultation</a>
+      <a class="btn btn--primary" href={url(`/book?service=${service.id}`)}>Book a consultation</a>
       <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call {practice.phone.display}</a>
     </div>
   </PageHeader>
@@ -76,7 +77,7 @@ const procedure = {
       <div class="container">
         <h2 id="related-h">Related in {category.data.name}</h2>
         <div class="grid grid--3">
-          {related.map((s) => <ServiceCard title={s.data.title} summary={s.data.summary} href={`/services/${category.id}/${s.id}`} />)}
+          {related.map((s) => <ServiceCard title={s.data.title} summary={s.data.summary} href={url(`/services/${category.id}/${s.id}`)} />)}
         </div>
       </div>
     </section>

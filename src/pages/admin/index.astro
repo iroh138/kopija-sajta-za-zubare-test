@@ -1,4 +1,6 @@
 ---
+import { url, IS_STATIC_PREVIEW } from '../../lib/url';
+// Server-rendered. The static GitHub Pages preview prerenders it instead (see astro.config.mjs).
 export const prerender = false;
 
 import { getCollection } from 'astro:content';
@@ -6,19 +8,20 @@ import { listRequests, updateStatus, STATUSES, type Status } from '../../lib/db'
 import { TIME_OPTIONS, CONTACT_OPTIONS } from '../../lib/booking';
 import { practice } from '../../lib/practice';
 
-if (Astro.request.method === 'POST') {
+if (!IS_STATIC_PREVIEW && Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const id = Number(form.get('id'));
   const status = String(form.get('status')) as Status;
   if (Number.isInteger(id) && STATUSES.includes(status)) updateStatus(id, status);
   const back = String(form.get('filter') ?? '');
-  return Astro.redirect(`/admin${STATUSES.includes(back as Status) ? `?status=${back}` : ''}`, 303);
+  const query = STATUSES.includes(back as Status) ? `?status=${back}` : '';
+  return Astro.redirect(url('/admin') + query, 303);
 }
 
 const filterParam = Astro.url.searchParams.get('status');
 const filter = STATUSES.includes(filterParam as Status) ? (filterParam as Status) : undefined;
-const rows = listRequests(filter);
-const all = listRequests();
+const rows = IS_STATIC_PREVIEW ? [] : listRequests(filter);
+const all = IS_STATIC_PREVIEW ? [] : listRequests();
 const counts = Object.fromEntries(STATUSES.map((s) => [s, all.filter((r) => r.status === s).length]));
 const serviceNames = Object.fromEntries((await getCollection('services')).map((s) => [s.id, s.data.title]));
 const timeLabel = (v: string) => v.split(',').filter(Boolean).map((t) => TIME_OPTIONS.find((o) => o.value === t)?.label ?? t).join(', ') || '—';
@@ -32,14 +35,15 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-US', { dateStyle: 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Appointment requests · {practice.name}</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
   </head>
   <body>
     <main class="admin">
       <h1>Appointment requests</h1>
+      {IS_STATIC_PREVIEW && <p><strong>Not available in the static preview.</strong> The request list needs the Node server.</p>}
       <nav class="filters" aria-label="Filter by status">
-        <a href="/admin" aria-current={!filter ? 'page' : undefined}>All ({all.length})</a>
-        {STATUSES.map((s) => <a href={`/admin?status=${s}`} aria-current={filter === s ? 'page' : undefined}>{s} ({counts[s]})</a>)}
+        <a href={url('/admin')} aria-current={!filter ? 'page' : undefined}>All ({all.length})</a>
+        {STATUSES.map((s) => <a href={url(`/admin?status=${s}`)} aria-current={filter === s ? 'page' : undefined}>{s} ({counts[s]})</a>)}
       </nav>
       {rows.length === 0 ? <p>No requests{filter ? ` with status “${filter}”` : ''}.</p> : (
         <div class="table-wrap">

@@ -1,4 +1,5 @@
 ---
+import { abs } from '../../../lib/url';
 import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import PageHeader from '../../../components/PageHeader.astro';
@@ -20,9 +21,9 @@ const article = {
   headline: post.data.title,
   description: post.data.description,
   datePublished: post.data.publishedAt.toISOString().slice(0, 10),
-  url: new URL(path, site).href,
+  url: abs(path, site),
   ...(author ? { author: { '@type': 'Person', name: author.data.name } } : {}),
-  publisher: { '@id': new URL('/#practice', site).href },
+  publisher: { '@id': abs('/#practice', site) },
 };
 ---
 <Base title={post.data.title} description={post.data.description} jsonLd={[breadcrumbJsonLd(site, crumbs), article]}>

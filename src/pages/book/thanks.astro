@@ -1,4 +1,5 @@
 ---
+import { url } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import { practice } from '../../lib/practice';
@@ -11,7 +12,7 @@ import { practice } from '../../lib/practice';
       <li>You get a confirmation with the date, time and what to bring.</li>
     </ol>
     <p>Need us sooner? Call <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a>.</p>
-    <a class="btn btn--secondary" href="/">Back to home</a>
+    <a class="btn btn--secondary" href={url('/')}>Back to home</a>
   </PageHeader>
 </Base>
 <style>

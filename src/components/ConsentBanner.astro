@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 /**
  * Analytics load only after explicit consent (spec 6.5).
  * Renders nothing unless PUBLIC_GTM_ID is set at build time.
@@ -7,7 +8,7 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID as string | undefined;
 ---
 {gtmId && (
   <div id="consent" class="consent" role="region" aria-label="Cookie consent" hidden data-gtm={gtmId}>
-    <p>We use analytics cookies to understand how the site is used. Nothing is loaded unless you agree. <a href="/privacy">Privacy</a></p>
+    <p>We use analytics cookies to understand how the site is used. Nothing is loaded unless you agree. <a href={url('/privacy')}>Privacy</a></p>
     <div class="btn-row">
       <button type="button" class="btn btn--primary" data-consent="granted">Accept analytics</button>
       <button type="button" class="btn btn--secondary" data-consent="denied">Decline</button>
