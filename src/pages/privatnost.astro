@@ -3,6 +3,7 @@ import { url } from '../lib/url';
 import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { practice, addressLine } from '../lib/practice';
+const retentionDays = Number(import.meta.env.REQUEST_RETENTION_DAYS ?? 90) || 90;
 ---
 <Base title="Obaveštenje o privatnosti" description={`Kako ${practice.legalName} obrađuje podatke poslate preko sajta.`}>
   <PageHeader title="Obaveštenje o privatnosti" crumbs={[{ name: 'Početna', path: '/' }, { name: 'Privatnost', path: '/privatnost' }]} />
@@ -13,6 +14,7 @@ import { practice, addressLine } from '../lib/practice';
       <p>{practice.legalName}, {addressLine()}. Kontakt: <a href={`mailto:${practice.email}`}>{practice.email}</a>.</p>
       <h2>Zahtevi za termin</h2>
       <p>Kada pošaljete zahtev za termin, čuvamo ime i prezime pacijenta (i roditelja ili staratelja za maloletne), broj telefona, e-mail ako ga unesete, željeno vreme, razlog dolaska i kratku poruku. Podatke koristimo isključivo da bismo vas kontaktirali i dogovorili termin, na osnovu vaše saglasnosti.</p>
+      <p>Zahteve za koje je termin dogovoren ili je komunikacija završena automatski brišemo {retentionDays} dana posle poslednje izmene.</p>
       <p>Molimo vas da u obrazac ne upisujete podatke o zdravstvenom stanju; o tome razgovaramo lično.</p>
       <h2>Analitika</h2>
       <p>Analitički kolačići učitavaju se samo ako ih prihvatite. Izbor možete promeniti brisanjem podataka ovog sajta u pretraživaču.</p>

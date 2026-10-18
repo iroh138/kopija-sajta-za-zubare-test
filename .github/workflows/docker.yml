@@ -1,0 +1,58 @@
+# Builds the production Docker image and smoke-tests it: health check, a booking request,
+# admin login and a database backup inside the container.
+name: Docker image
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build --build-arg SITE_URL=http://localhost:8080 -t 3adent:ci .
+
+      - name: Start container
+        run: |
+          docker run -d --name web -p 8080:4321 \
+            -e ADMIN_USER=admin -e ADMIN_PASSWORD=ci-secret \
+            -v appdata:/data 3adent:ci
+          for i in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' web)" = healthy ] && break
+            sleep 2
+          done
+          docker inspect -f '{{.State.Health.Status}}' web | grep -qx healthy
+
+      - name: Smoke test
+        run: |
+          set -e
+          B=http://localhost:8080
+          test "$(curl -s $B/health)" = ok
+          test "$(curl -s -o /dev/null -w '%{http_code}' $B/)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' $B/usluge/lecenje-zuba)" = 200
+          # Empty form -> 422 with errors
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Sec-Fetch-Site: same-origin' -d '' $B/zakazivanje)" = 422
+          # Valid request -> 303 to thank-you page
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Sec-Fetch-Site: same-origin' \
+            --data 'patientName=CI+Test&patientIsMinor=no&phone=0601234567&preferredContact=phone&patientType=new&urgent=on&consentPrivacy=on' \
+            $B/zakazivanje)
+          test "$code" = 303
+          # Cross-site post rejected
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Sec-Fetch-Site: cross-site' -d 'x=1' $B/zakazivanje)" = 403
+          # Admin: locked without credentials, lists the request with them
+          test "$(curl -s -o /dev/null -w '%{http_code}' $B/admin)" = 401
+          curl -s -u admin:ci-secret $B/admin | grep -q 'CI Test'
+          # Backup inside the container
+          docker exec web node scripts/backup.mjs | grep -q 'backup ok'
+
+      - name: Container logs
+        if: always()
+        run: docker logs web || true

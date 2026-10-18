@@ -39,6 +39,36 @@ Internal links go through `url()` in `src/lib/url.ts` so they work under any bas
 With the server running: `CHROME_PATH=/path/to/chrome npm run audit` checks that every sitemap
 URL returns 200, then runs Lighthouse (mobile) and axe-core on key pages.
 
+## Deploy (production)
+
+The GitHub Pages preview cannot take bookings. Production needs a server that runs Node and keeps a
+disk for SQLite. The repo ships a Docker setup that runs on any Linux VPS (e.g. a small Hetzner,
+DigitalOcean or local Serbian VPS, ~5 EUR/month):
+
+1. Point the domain's DNS A records (`example.rs` and `www.example.rs`) to the server.
+2. On the server: `git clone` this repo, `cp .env.example .env`, fill in `DOMAIN`, `SITE_URL`,
+   `ADMIN_USER`, `ADMIN_PASSWORD` and the `SMTP_*` / `NOTIFY_EMAIL` values.
+3. `docker compose up -d --build`. Caddy gets the HTTPS certificate automatically and redirects
+   the bare domain to `www`.
+4. Check `https://www.<domain>/health` returns `ok`, send a test booking, open `/admin`.
+
+**Backups:** `scripts/backup.mjs` writes a verified copy of the database to `/data/backups` and
+keeps the newest `BACKUP_KEEP`. Schedule it on the host and copy the folder off the server:
+
+```cron
+0 3 * * * cd /srv/3adent && docker compose exec -T web node scripts/backup.mjs
+```
+
+**Data retention:** booked/closed requests are deleted automatically `REQUEST_RETENTION_DAYS`
+(default 90) after their last change; staff can delete any request in `/admin` (right to erasure).
+
+**Behind the proxy** Astro trusts `X-Forwarded-*` only for the `SITE_URL` host
+(`security.allowedDomains`), so form origin checks see `https://` and the booking rate limit
+counts real visitor IPs.
+
+CI (`.github/workflows/docker.yml`) builds the image on every push and smoke-tests it: health,
+booking, cross-site rejection, admin login and a backup.
+
 ## Where things live
 
 | What | File |

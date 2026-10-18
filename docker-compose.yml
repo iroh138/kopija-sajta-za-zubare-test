@@ -1,0 +1,41 @@
+# Run on any Linux VPS with Docker: copy .env.example to .env, set DOMAIN/SITE_URL and the rest, then
+#   docker compose up -d --build
+# Caddy obtains and renews the HTTPS certificate automatically (ports 80 and 443 must be open,
+# and the domain's DNS A record must point to this server).
+services:
+  web:
+    build:
+      context: .
+      args:
+        SITE_URL: ${SITE_URL:?set SITE_URL in .env}
+        REQUEST_RETENTION_DAYS: ${REQUEST_RETENTION_DAYS:-90}
+        PUBLIC_GTM_ID: ${PUBLIC_GTM_ID:-}
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+      HOST: 0.0.0.0
+      PORT: 4321
+    volumes:
+      - appdata:/data
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  appdata:
+  caddy_data:
+  caddy_config:

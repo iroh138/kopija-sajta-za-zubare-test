@@ -8,7 +8,7 @@ import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import { practice } from '../../lib/practice';
 import { parseBooking, emptyValues, rateLimited, TIME_OPTIONS, CONTACT_OPTIONS, type BookingErrors } from '../../lib/booking';
-import { insertRequest } from '../../lib/db';
+import { insertRequest, purgeOldRequests } from '../../lib/db';
 import { notifyPractice } from '../../lib/mail';
 
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
@@ -52,6 +52,7 @@ if (!IS_STATIC_PREVIEW && Astro.request.method === 'POST') {
         consent_privacy: 1,
         source: form.get('source')?.toString().slice(0, 300) || Astro.request.headers.get('referer')?.slice(0, 300) || null,
       });
+      purgeOldRequests();
       await notifyPractice({ id, preferred_contact: values.preferredContact, patient_type: values.patientType, urgent: values.urgent ? 1 : 0 }, practice.name);
       return Astro.redirect(url('/zakazivanje/hvala'), 303);
     } catch (err) {

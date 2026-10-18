@@ -8,6 +8,10 @@ const site = process.env.SITE_URL ?? 'https://www.example.com';
 // Static preview for GitHub Pages: no server, served under /<repo>/.
 const isPreview = process.env.PUBLIC_PREVIEW_STATIC === '1';
 const base = process.env.BASE_PATH ?? '/';
+// Behind a reverse proxy (Caddy), trust X-Forwarded-Host/Proto/For only for our own domain.
+// This makes Astro.url use https://<domain> (needed for the form origin check) and
+// Astro.clientAddress the visitor's IP (needed for the booking rate limit).
+const siteHost = process.env.SITE_URL ? new URL(process.env.SITE_URL) : null;
 
 export default defineConfig({
   site,
@@ -15,6 +19,7 @@ export default defineConfig({
   trailingSlash: 'never',
   // Pages are prerendered by default; /zakazivanje and /admin opt out (prerender = false) except in the static preview.
   output: 'static',
+  security: siteHost ? { allowedDomains: [{ hostname: siteHost.hostname, protocol: siteHost.protocol.replace(':', '') }] } : {},
   adapter: isPreview ? undefined : node({ mode: 'standalone' }),
   integrations: [
     {
@@ -23,7 +28,7 @@ export default defineConfig({
       name: 'static-preview-routes',
       hooks: {
         'astro:route:setup': ({ route }) => {
-          if (isPreview && /src\/pages\/(zakazivanje\/index|admin\/index)\.astro$/.test(route.component)) route.prerender = true;
+          if (isPreview && /src\/pages\/(zakazivanje\/index\.astro|admin\/index\.astro|health\.ts)$/.test(route.component)) route.prerender = true;
         },
       },
     },

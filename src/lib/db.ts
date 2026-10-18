@@ -84,3 +84,30 @@ export function updateStatus(id: number, status: Status): boolean {
     .run(status, id);
   return res.changes === 1;
 }
+
+export function deleteRequest(id: number): boolean {
+  return getDb().prepare('DELETE FROM appointment_request WHERE id = ?').run(id).changes === 1;
+}
+
+/**
+ * Data minimisation: requests that are finished ('booked' or 'closed') are deleted once they have not been
+ * touched for REQUEST_RETENTION_DAYS (default 90). Open requests ('new', 'contacted') are never auto-deleted.
+ * Runs at most once an hour, triggered by normal traffic (booking or admin), so no cron is needed.
+ */
+let lastPurge = 0;
+export function purgeOldRequests(now = Date.now()): number {
+  if (now - lastPurge < 60 * 60 * 1000) return 0;
+  lastPurge = now;
+  const days = Math.max(1, Number(process.env.REQUEST_RETENTION_DAYS ?? 90) || 90);
+  const cutoff = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+  const res = getDb()
+    .prepare("DELETE FROM appointment_request WHERE status IN ('booked','closed') AND updated_at < ?")
+    .run(cutoff);
+  if (res.changes) console.info(`[retention] deleted ${res.changes} finished request(s) older than ${days} days`);
+  return res.changes;
+}
+
+/** Consistent online copy of the database (safe while the server is running). */
+export async function backupTo(file: string): Promise<void> {
+  await getDb().backup(file);
+}
