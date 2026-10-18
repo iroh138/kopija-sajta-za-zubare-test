@@ -1,15 +1,14 @@
 import { abs } from './url';
-import { practice, DAY_NAMES } from './practice';
+import { practice, DAY_NAMES_EN } from './practice';
 
 /** Practice JSON-LD, generated from practice.json so it always matches the visible NAP and hours. */
 export function practiceJsonLd(site: URL) {
   const p = practice;
-  const days = DAY_NAMES;
   const openingHoursSpecification = p.hours
     .filter((h) => !('closed' in h && h.closed))
     .map((h: any) => ({
       '@type': 'OpeningHoursSpecification',
-      dayOfWeek: days[h.day - 1],
+      dayOfWeek: `https://schema.org/${DAY_NAMES_EN[h.day - 1]}`,
       opens: h.opens,
       closes: h.closes,
     }));
@@ -26,13 +25,17 @@ export function practiceJsonLd(site: URL) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Dentist',
-    '@id': abs('/#practice', site),
+    '@id': abs('/#ordinacija', site),
     name: p.name,
+    alternateName: p.legalName,
     slogan: p.tagline,
     url: abs('/', site),
-    telephone: p.phone.e164,
+    logo: abs('/images/logo-3a-dent.svg', site),
+    image: abs('/images/hero.webp', site),
+    ...(p.phone ? { telephone: p.phone.e164 } : {}),
     email: p.email,
     isAcceptingNewPatients: p.acceptingNewPatients,
+    currenciesAccepted: 'RSD',
     address: {
       '@type': 'PostalAddress',
       streetAddress: [p.address.street, p.address.unit].filter(Boolean).join(', '),
@@ -41,15 +44,13 @@ export function practiceJsonLd(site: URL) {
       postalCode: p.address.postalCode,
       addressCountry: p.address.country,
     },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: Number(p.geo.lat.toFixed(5)),
-      longitude: Number(p.geo.lng.toFixed(5)),
-    },
+    ...(p.geo
+      ? { geo: { '@type': 'GeoCoordinates', latitude: Number(p.geo.lat.toFixed(5)), longitude: Number(p.geo.lng.toFixed(5)) } }
+      : {}),
     hasMap: p.mapsUrl,
     openingHoursSpecification,
     ...(specialOpeningHoursSpecification.length ? { specialOpeningHoursSpecification } : {}),
-    areaServed: p.serviceAreas.map((name) => ({ '@type': 'City', name })),
+    areaServed: p.serviceAreas.map((name) => ({ '@type': 'Place', name })),
     ...(sameAs.length ? { sameAs } : {}),
   };
 }

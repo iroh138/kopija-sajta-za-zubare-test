@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "tea-t",
+    "author": "Tea T.",
+    "body": "Doktorka je pažljiva, smirena i posvećena. Sve detaljno objasni i radi veoma nežno. Toplo je preporučujem.",
+    "rating": 5,
+    "source": "Utisak pacijenta objavljen na ranijem sajtu ordinacije",
+    "consentRecorded": true,
+    "verbatim": false
+  }
+]

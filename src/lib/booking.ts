@@ -1,15 +1,15 @@
 /** Validation for the appointment request form. Server-side only; the browser adds HTML constraints on top. */
 
 export const TIME_OPTIONS = [
-  { value: 'weekday-morning', label: 'Weekday mornings' },
-  { value: 'weekday-afternoon', label: 'Weekday afternoons' },
-  { value: 'saturday', label: 'Saturday clinic' },
+  { value: 'pre-podne', label: 'Pre podne (utorak i četvrtak, 8–13 h)' },
+  { value: 'popodne', label: 'Popodne (13–16 h)' },
+  { value: 'uvece', label: 'Uveče (ponedeljak, sreda i petak, do 21 h)' },
 ] as const;
 
 export const CONTACT_OPTIONS = [
-  { value: 'phone', label: 'Phone call' },
-  { value: 'text', label: 'Text message' },
-  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Telefonski poziv' },
+  { value: 'text', label: 'SMS / Viber' },
+  { value: 'email', label: 'E-mail' },
 ] as const;
 
 export interface BookingValues {
@@ -23,6 +23,7 @@ export interface BookingValues {
   service: string;
   preferredTimes: string[];
   message: string;
+  urgent: boolean;
   consentPrivacy: boolean;
 }
 
@@ -39,6 +40,7 @@ export const emptyValues = (): BookingValues => ({
   service: '',
   preferredTimes: [],
   message: '',
+  urgent: false,
   consentPrivacy: false,
 });
 
@@ -56,21 +58,22 @@ export function parseBooking(form: FormData, serviceIds: string[]) {
     service: str(form.get('service')),
     preferredTimes: form.getAll('preferredTimes').map((v) => str(v)).filter((v) => TIME_OPTIONS.some((o) => o.value === v)),
     message: str(form.get('message'), 500),
+    urgent: form.get('urgent') === 'on',
     consentPrivacy: form.get('consentPrivacy') === 'on',
   };
 
   const errors: BookingErrors = {};
-  if (values.patientName.length < 2) errors.patientName = 'Enter the patient’s full name.';
-  if (!values.patientIsMinor) errors.patientIsMinor = 'Tell us whether the patient is under 18.';
-  if (values.patientIsMinor === 'yes' && values.guardianName.length < 2) errors.guardianName = 'Enter the parent or guardian’s name.';
+  if (values.patientName.length < 2) errors.patientName = 'Unesite ime i prezime pacijenta.';
+  if (!values.patientIsMinor) errors.patientIsMinor = 'Označite da li je pacijent mlađi od 18 godina.';
+  if (values.patientIsMinor === 'yes' && values.guardianName.length < 2) errors.guardianName = 'Unesite ime i prezime roditelja ili staratelja.';
   const digits = values.phone.replace(/\D/g, '');
-  if (digits.length < 7 || digits.length > 15) errors.phone = 'Enter a phone number we can reach you on.';
-  if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) errors.email = 'Enter a valid email address, or leave it blank.';
-  if (!CONTACT_OPTIONS.some((o) => o.value === values.preferredContact)) errors.preferredContact = 'Choose how we should contact you.';
-  if (values.preferredContact === 'email' && !values.email) errors.email = 'Enter an email address, or choose another way to contact you.';
-  if (!values.patientType) errors.patientType = 'Tell us whether you are a new or existing patient.';
+  if (digits.length < 7 || digits.length > 15) errors.phone = 'Unesite broj telefona na koji možemo da vas kontaktiramo.';
+  if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) errors.email = 'Unesite ispravnu e-mail adresu ili ostavite polje prazno.';
+  if (!CONTACT_OPTIONS.some((o) => o.value === values.preferredContact)) errors.preferredContact = 'Izaberite kako da vas kontaktiramo.';
+  if (values.preferredContact === 'email' && !values.email) errors.email = 'Unesite e-mail adresu ili izaberite drugi način kontakta.';
+  if (!values.patientType) errors.patientType = 'Označite da li ste već bili kod nas.';
   if (values.service && !serviceIds.includes(values.service)) values.service = '';
-  if (!values.consentPrivacy) errors.consentPrivacy = 'You need to agree before we can store your request.';
+  if (!values.consentPrivacy) errors.consentPrivacy = 'Potrebna je vaša saglasnost da bismo sačuvali zahtev.';
 
   /** Honeypot: real users never see or fill this field. */
   const isBot = str(form.get('website')).length > 0;

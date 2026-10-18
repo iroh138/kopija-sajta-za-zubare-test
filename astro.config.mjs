@@ -13,7 +13,7 @@ export default defineConfig({
   site,
   base,
   trailingSlash: 'never',
-  // Pages are prerendered by default; /book and /admin opt out (prerender = false) except in the static preview.
+  // Pages are prerendered by default; /zakazivanje and /admin opt out (prerender = false) except in the static preview.
   output: 'static',
   adapter: isPreview ? undefined : node({ mode: 'standalone' }),
   integrations: [
@@ -23,12 +23,12 @@ export default defineConfig({
       name: 'static-preview-routes',
       hooks: {
         'astro:route:setup': ({ route }) => {
-          if (isPreview && /src\/pages\/(book\/index|admin\/index)\.astro$/.test(route.component)) route.prerender = true;
+          if (isPreview && /src\/pages\/(zakazivanje\/index|admin\/index)\.astro$/.test(route.component)) route.prerender = true;
         },
       },
     },
     sitemap({
-      filter: (page) => !page.includes('/admin') && !page.includes('/book/thanks'),
+      filter: (page) => !page.includes('/admin') && !page.includes('/zakazivanje/hvala'),
     }),
   ],
 });

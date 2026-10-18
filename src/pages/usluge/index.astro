@@ -1,0 +1,76 @@
+---
+import { url } from '../../lib/url';
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { breadcrumbJsonLd } from '../../lib/schema';
+import { practice } from '../../lib/practice';
+
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const crumbs = [{ name: 'Početna', path: '/' }, { name: 'Usluge', path: '/usluge' }];
+const site = Astro.site ?? new URL(Astro.url.origin);
+---
+<Base
+  title={`Stomatološke usluge – ${practice.address.city}`}
+  description={`Sve usluge ordinacije ${practice.name}: preventiva, lečenje zuba i kanala, oralna hirurgija, protetika, lečenje desni i beljenje zuba.`}
+  jsonLd={[breadcrumbJsonLd(site, crumbs)]}
+>
+  <PageHeader title="Usluge" lead="Opšta stomatologija za odrasle i decu, sve u lokalnoj anesteziji." crumbs={crumbs} />
+
+  <section class="section">
+    <div class="container">
+      <ol class="service-list">
+        {services.map((s, i) => (
+          <li class="service-item">
+            <span class="service-item__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <h2><a href={url(`/usluge/${s.id}`)}>{s.data.title}</a></h2>
+              <p>{s.data.summary}</p>
+              <ul class="chips">
+                {s.data.subservices.slice(0, 5).map((x) => <li>{x}</li>)}
+                {s.data.subservices.length > 5 && <li class="chips__more">+{s.data.subservices.length - 5}</li>}
+              </ul>
+            </div>
+            <a class="btn btn--secondary service-item__btn" href={url(`/usluge/${s.id}`)} aria-label={`Detaljnije: ${s.data.title}`}>Detaljnije</a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  {practice.notOffered.length > 0 && (
+    <section class="section section--tint" aria-labelledby="not-h">
+      <div class="container">
+        <h2 id="not-h">Šta ne radimo</h2>
+        <p>Da biste odmah znali na čemu ste: sledeće tretmane ne radimo, ali vas rado upućujemo kolegama specijalistima.</p>
+        <ul class="not-list">
+          {practice.notOffered.map((n) => <li><strong>{n.name}.</strong> {n.note}</li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container" style="text-align:center">
+      <h2>Niste sigurni koja vam usluga treba?</h2>
+      <p style="margin-inline:auto">Zakažite pregled. Doktorka će vam objasniti stanje zuba i predložiti terapiju pre nego što bilo šta počne.</p>
+      <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin online</a>
+    </div>
+  </section>
+</Base>
+<style>
+  .service-list { list-style: none; padding: 0; margin: 0; }
+  .service-item { display: grid; gap: var(--space-2) var(--space-3); padding-block: var(--space-4); border-bottom: 1px solid var(--color-divider); }
+  .service-item:first-child { padding-top: 0; }
+  @media (min-width: 900px) { .service-item { grid-template-columns: 5rem 1fr auto; align-items: start; } }
+  .service-item__num { font-size: var(--step-2); font-weight: 300; color: var(--color-accent); line-height: 1.2; }
+  .service-item h2 { font-size: var(--step-2); margin-bottom: var(--space-1); }
+  .service-item h2 a { color: inherit; text-decoration: none; }
+  .service-item h2 a:hover { text-decoration: underline; }
+  .service-item p { font-weight: 300; font-size: 1.1rem; }
+  .chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chips li { padding: 0.3rem 0.85rem; border-radius: 999px; background: var(--color-tint); font-size: 0.95rem; color: var(--color-ink); }
+  .chips__more { background: var(--color-tint-2) !important; }
+  .not-list { padding-left: 1.2rem; }
+  .not-list li { margin-bottom: 0.5rem; }
+</style>

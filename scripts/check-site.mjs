@@ -5,16 +5,18 @@ import { join, relative } from 'node:path';
 
 const root = existsSync('dist/client') ? 'dist/client' : 'dist';
 const practice = JSON.parse(readFileSync('src/data/practice.json', 'utf8'));
-const phone = practice.phone.e164;
+const phone = practice.phone?.e164 ?? null;
 
 // Strings from the analysed source site that must never appear in this build.
 const FORBIDDEN = ['Airily', 'airily', 'Zoga', 'Demergis', 'Moorestown', 'Lenola', '242-2111', '242-1660', '263-3094', 'Breathe Better', 'Breathe. Smile', 'Thrive for Life', 'Smile Solutions That Go Beyond', 'Not Sure Where to Start', 'Specialized, High-Tech', 'Lasso', 'MARPE'];
+// Leftovers from the placeholder template that must not survive into the client site.
+FORBIDDEN.push('Sample Orthodontics', 'Anytown', '555-0142', 'Placeholder', 'Example Dental Plan', 'Orthodontist in');
 
 const problems = [];
 
 // Server build: /book and /admin must stay server-rendered, or the form and the admin login silently stop working.
 if (root === 'dist/client') {
-  for (const p of ['book/index.html', 'admin/index.html']) {
+  for (const p of ['zakazivanje/index.html', 'admin/index.html']) {
     if (existsSync(join(root, p))) problems.push(`${p} was prerendered in the server build; it must be server-rendered`);
   }
 }
@@ -49,19 +51,21 @@ for (const file of files) {
   for (const m of html.matchAll(/href="tel:([^"]+)"/g)) {
     if (m[1] !== phone) fail(file, `tel link ${m[1]} does not match practice phone ${phone}`);
   }
+  if (!/<html lang="sr-Latn"/.test(html)) fail(file, 'missing lang="sr-Latn"');
 
   for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
     let data;
     try { data = JSON.parse(m[1]); } catch { fail(file, 'invalid JSON-LD'); continue; }
     if (data['@type'] === 'Dentist') {
-      if (data.telephone !== phone) fail(file, `JSON-LD telephone ${data.telephone} != ${phone}`);
+      if ((data.telephone ?? null) !== phone) fail(file, `JSON-LD telephone ${data.telephone} != ${phone}`);
       if (data.address?.postalCode !== practice.address.postalCode) fail(file, 'JSON-LD postal code mismatch');
       const open = practice.hours.filter((h) => !h.closed).length;
       if (data.openingHoursSpecification?.length !== open) fail(file, 'JSON-LD hours count differs from practice.json');
     }
   }
 
-  if (!html.includes(practice.phone.display)) fail(file, 'visible phone number missing');
+  if (practice.phone && !html.includes(practice.phone.display)) fail(file, 'visible phone number missing');
+  if (!html.includes(practice.address.street)) fail(file, 'visible address missing');
 
   for (const s of FORBIDDEN) if (html.includes(s)) fail(file, `contains source-site string "${s}"`);
 }
@@ -74,4 +78,4 @@ if (problems.length) {
   console.error(`✗ ${problems.length} problem(s) in ${files.length} pages:\n  ` + problems.join('\n  '));
   process.exit(1);
 }
-console.log(`✓ ${files.length} pages passed: one h1, titles unique, alt present, NAP consistent with practice.json, no source-site strings.`);
+console.log(`✓ ${files.length} pages passed: one h1, titles unique, alt present, lang sr-Latn, NAP consistent with practice.json, no source-site strings.`);

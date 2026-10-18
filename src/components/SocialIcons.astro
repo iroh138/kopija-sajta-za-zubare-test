@@ -10,7 +10,7 @@ const icons: Record<string, string> = {
 };
 const items = [
   ...practice.social.map((s) => ({ label: s.network, url: s.url, icon: icons[s.network.toLowerCase()] ?? icons.link })),
-  ...(practice.profileUrl ? [{ label: 'Reviews and map listing', url: practice.profileUrl, icon: icons.map }] : [{ label: 'Directions', url: practice.mapsUrl, icon: icons.map }]),
+  ...(practice.profileUrl ? [{ label: 'Recenzije i lokacija na mapi', url: practice.profileUrl, icon: icons.map }] : [{ label: 'Kako do nas (Google mape)', url: practice.mapsUrl, icon: icons.map }]),
 ];
 ---
 <ul class="social">

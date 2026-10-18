@@ -18,6 +18,7 @@ export interface AppointmentRequest {
   service_interest: string | null;
   preferred_times: string;
   message: string | null;
+  urgent: number;
   consent_privacy: number;
   source: string | null;
   status: Status;
@@ -54,6 +55,9 @@ export function getDb(): Database.Database {
     );
     CREATE INDEX IF NOT EXISTS idx_request_status ON appointment_request(status, created_at);
   `);
+  // Migration: 'urgent' added after the first release.
+  const cols = db.prepare("SELECT name FROM pragma_table_info('appointment_request')").all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'urgent')) db.exec('ALTER TABLE appointment_request ADD COLUMN urgent INTEGER NOT NULL DEFAULT 0');
   return db;
 }
 
@@ -61,17 +65,17 @@ export function insertRequest(r: Omit<AppointmentRequest, 'id' | 'created_at' | 
   const stmt = getDb().prepare(`
     INSERT INTO appointment_request
       (patient_name, patient_is_minor, guardian_name, phone, email, preferred_contact, patient_type,
-       service_interest, preferred_times, message, consent_privacy, source)
+       service_interest, preferred_times, message, urgent, consent_privacy, source)
     VALUES (@patient_name, @patient_is_minor, @guardian_name, @phone, @email, @preferred_contact, @patient_type,
-       @service_interest, @preferred_times, @message, @consent_privacy, @source)`);
+       @service_interest, @preferred_times, @message, @urgent, @consent_privacy, @source)`);
   return Number(stmt.run(r).lastInsertRowid);
 }
 
 export function listRequests(status?: Status): AppointmentRequest[] {
   const d = getDb();
   return status
-    ? (d.prepare('SELECT * FROM appointment_request WHERE status = ? ORDER BY created_at DESC').all(status) as AppointmentRequest[])
-    : (d.prepare('SELECT * FROM appointment_request ORDER BY created_at DESC').all() as AppointmentRequest[]);
+    ? (d.prepare('SELECT * FROM appointment_request WHERE status = ? ORDER BY urgent DESC, created_at DESC').all(status) as AppointmentRequest[])
+    : (d.prepare('SELECT * FROM appointment_request ORDER BY urgent DESC, created_at DESC').all() as AppointmentRequest[]);
 }
 
 export function updateStatus(id: number, status: Status): boolean {

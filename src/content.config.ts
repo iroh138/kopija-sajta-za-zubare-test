@@ -1,4 +1,4 @@
-import { defineCollection, reference } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
@@ -13,22 +13,15 @@ const image = z
   })
   .refine((i) => i.decorative || i.alt.trim().length > 0, { message: 'Image needs alt text (or decorative: true)' });
 
-const categories = defineCollection({
-  loader: file('src/content/categories.json'),
-  schema: z.object({
-    name: z.string(),
-    intro: z.string(),
-    order: z.number(),
-  }),
-});
-
+/** One Markdown file per service area; its sub-services are listed on the service page, not split into thin pages. */
 const services = defineCollection({
   loader: glob({ pattern: '**/*.md', base: 'src/content/services' }),
   schema: z.object({
     title: z.string(),
-    category: reference('categories'),
-    summary: z.string().max(220),
-    featuredOnHome: z.boolean().default(false),
+    shortTitle: z.string().optional(),
+    summary: z.string().max(240),
+    subservices: z.array(z.string()).min(1),
+    featuredOnHome: z.boolean().default(true),
     order: z.number().default(100),
     image: image.optional(),
     seoTitle: z.string().optional(),
@@ -41,22 +34,11 @@ const staff = defineCollection({
   loader: glob({ pattern: '**/*.md', base: 'src/content/staff' }),
   schema: z.object({
     name: z.string(),
+    honorific: z.string().optional(),
     credentials: z.string().optional(),
     role: z.string(),
     order: z.number().default(100),
     photo: image.optional(),
-  }),
-});
-
-const blog = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: 'src/content/blog' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string().max(160),
-    publishedAt: z.coerce.date(),
-    author: reference('staff'),
-    draft: z.boolean().default(false),
-    cover: image.optional(),
   }),
 });
 
@@ -66,12 +48,14 @@ const testimonials = defineCollection({
   schema: z.object({
     author: z.string(),
     body: z.string(),
-    rating: z.number().int().min(1).max(5),
+    rating: z.number().int().min(1).max(5).optional(),
     source: z.string(),
     sourceUrl: z.string().url().optional(),
-    reviewDate: z.coerce.date(),
+    reviewDate: z.coerce.date().optional(),
     consentRecorded: z.boolean(),
+    /** false = text is a paraphrase awaiting the patient's exact words; shown only in the preview build, labelled. */
+    verbatim: z.boolean().default(true),
   }),
 });
 
-export const collections = { categories, services, staff, blog, testimonials };
+export const collections = { services, staff, testimonials };

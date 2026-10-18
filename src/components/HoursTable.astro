@@ -2,7 +2,7 @@
 import { hoursRows, upcomingSpecialDates } from '../lib/practice';
 
 interface Props { showSpecial?: boolean; caption?: string }
-const { showSpecial = true, caption = 'Opening hours' } = Astro.props;
+const { showSpecial = true, caption = 'Radno vreme' } = Astro.props;
 const rows = hoursRows();
 const special = showSpecial ? upcomingSpecialDates().slice(0, 3) : [];
 ---
@@ -16,7 +16,7 @@ const special = showSpecial ? upcomingSpecialDates().slice(0, 3) : [];
 </table>
 {special.length > 0 && (
   <div class="special">
-    <p class="special__title">Upcoming dates</p>
+    <p class="special__title">Posebni datumi</p>
     <ul>
       {special.map((s) => <li><strong>{s.pretty}</strong> ({s.label}): {s.text}</li>)}
     </ul>

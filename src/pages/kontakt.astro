@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import LocationBlock from '../components/LocationBlock.astro';
+import { practice, addressLine } from '../lib/practice';
+import { breadcrumbJsonLd } from '../lib/schema';
+const crumbs = [{ name: 'Početna', path: '/' }, { name: 'Kontakt', path: '/kontakt' }];
+const site = Astro.site ?? new URL(Astro.url.origin);
+---
+<Base
+  title="Kontakt i lokacija"
+  description={`Adresa, radno vreme i mapa: ${practice.legalName}, ${addressLine()}. Zakazivanje isključivo online.`}
+  jsonLd={[breadcrumbJsonLd(site, crumbs)]}
+>
+  <PageHeader title="Kontakt" lead="Termine zakazujemo isključivo online. Za ostala pitanja pišite nam na e-mail." crumbs={crumbs} />
+  <section class="section">
+    <div class="container"><LocationBlock /></div>
+  </section>
+</Base>

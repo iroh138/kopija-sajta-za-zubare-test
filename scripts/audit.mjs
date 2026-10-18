@@ -7,7 +7,7 @@ import { createRequire } from 'node:module';
 import puppeteer from 'puppeteer-core';
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:4321';
-const PAGES = ['/', '/services', '/services/orthodontics/braces', '/about/team', '/about/blog/welcome', '/patient-info', '/contact', '/book'];
+const PAGES = ['/', '/usluge', '/usluge/lecenje-zuba', '/o-nama', '/pitanja', '/kontakt', '/zakazivanje', '/privatnost'];
 const axeSource = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
 
 // 1. Every URL in the sitemap must answer 200 on the running server.

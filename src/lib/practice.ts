@@ -2,8 +2,9 @@ import { z } from 'astro/zod';
 import raw from '../data/practice.json';
 
 /**
- * The single source of truth for name, address, phone, hours and insurers.
+ * Single source of truth for name, address, phone, email and hours.
  * Header, footer, contact blocks and JSON-LD all read from here, so they cannot disagree.
+ * Phone and coordinates are optional: when null, every call button and the schema field are omitted.
  */
 const time = z.string().regex(/^\d{2}:\d{2}$/, 'Use HH:MM');
 
@@ -22,9 +23,10 @@ const special = z.object({
 
 const PracticeSchema = z.object({
   name: z.string().min(1),
+  legalName: z.string(),
   tagline: z.string(),
   specialty: z.string(),
-  phone: z.object({ display: z.string(), e164: z.string().regex(/^\+\d{8,15}$/, 'E.164, e.g. +12015550142') }),
+  phone: z.object({ display: z.string(), e164: z.string().regex(/^\+\d{8,15}$/, 'E.164, e.g. +381111234567') }).nullable(),
   email: z.string().email(),
   address: z.object({
     street: z.string(),
@@ -34,36 +36,40 @@ const PracticeSchema = z.object({
     postalCode: z.string(),
     country: z.string().length(2),
   }),
-  geo: z.object({ lat: z.number(), lng: z.number() }),
+  geo: z.object({ lat: z.number(), lng: z.number() }).nullable(),
   mapsUrl: z.string().url(),
+  mapEmbedQuery: z.string(),
   profileUrl: z.string(),
   social: z.array(z.object({ network: z.string(), url: z.string().url() })),
+  bookingOnly: z.boolean(),
   acceptingNewPatients: z.boolean(),
+  yearsActive: z.number().int().positive().optional(),
   freeConsultation: z.object({ offered: z.boolean(), note: z.string() }),
   hours: z.array(hour).length(7),
   specialDates: z.array(special),
   serviceAreas: z.array(z.string()),
   insurers: z.array(z.object({ name: z.string(), accepted: z.boolean(), notes: z.string().optional() })),
   payments: z.array(z.object({ name: z.string(), description: z.string() })),
+  paymentNote: z.string(),
+  notOffered: z.array(z.object({ name: z.string(), note: z.string() })),
   reasons: z.array(z.object({ title: z.string(), body: z.string() })),
 });
 
 export type Practice = z.infer<typeof PracticeSchema>;
 export const practice: Practice = PracticeSchema.parse(raw);
 
-export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+export const DAY_NAMES = ['Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota', 'Nedelja'];
+export const DAY_NAMES_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+/** 24-hour format used in Serbia: "13:00". */
 export function formatTime(t: string): string {
-  const [h, m] = t.split(':').map(Number);
-  const suffix = h >= 12 ? 'p.m.' : 'a.m.';
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${String(m).padStart(2, '0')} ${suffix}`;
+  return t;
 }
 
 export function hoursRows() {
   return practice.hours.map((h) => ({
     day: DAY_NAMES[h.day - 1],
-    text: 'closed' in h && h.closed ? 'Closed' : `${formatTime((h as any).opens)} – ${formatTime((h as any).closes)}`,
+    text: 'closed' in h && h.closed ? 'Ne radimo' : `${(h as any).opens} – ${(h as any).closes}`,
   }));
 }
 
@@ -75,16 +81,16 @@ export function upcomingSpecialDates(today = new Date()) {
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((d) => ({
       ...d,
-      pretty: new Date(`${d.date}T12:00:00`).toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-      }),
-      text: d.closed ? 'Closed' : `${formatTime(d.opens!)} – ${formatTime(d.closes!)}`,
+      pretty: new Date(`${d.date}T12:00:00`).toLocaleDateString('sr-Latn-RS', { weekday: 'long', day: 'numeric', month: 'long' }),
+      text: d.closed ? 'Ne radimo' : `${d.opens} – ${d.closes}`,
     }));
 }
 
 export function addressLine(): string {
   const a = practice.address;
-  return `${a.street}${a.unit ? `, ${a.unit}` : ''}, ${a.city}, ${a.region} ${a.postalCode}`;
+  return `${a.street}${a.unit ? `, ${a.unit}` : ''}, ${a.postalCode} ${a.city}`;
+}
+
+export function mapEmbedUrl(): string {
+  return `https://maps.google.com/maps?q=${encodeURIComponent(practice.mapEmbedQuery)}&z=16&output=embed`;
 }

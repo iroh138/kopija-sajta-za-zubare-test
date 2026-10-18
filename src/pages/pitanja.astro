@@ -1,0 +1,32 @@
+---
+import { url } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { breadcrumbJsonLd, faqJsonLd } from '../lib/schema';
+import { practice } from '../lib/practice';
+import faq from '../data/faq.json';
+
+const crumbs = [{ name: 'Početna', path: '/' }, { name: 'Pitanja i odgovori', path: '/pitanja' }];
+const site = Astro.site ?? new URL(Astro.url.origin);
+---
+<Base
+  title="Pitanja i odgovori"
+  description={`Da li boli, kako se zakazuje, radi li ${practice.name} vikendom i preko osiguranja, koliko traje intervencija: odgovori na najčešća pitanja pacijenata.`}
+  jsonLd={[breadcrumbJsonLd(site, crumbs), faqJsonLd(faq)]}
+>
+  <PageHeader title="Pitanja i odgovori" lead="Odgovori na pitanja koja nam pacijenti najčešće postavljaju." crumbs={crumbs} />
+  <section class="section">
+    <div class="container prose">
+      {faq.map((f, i) => (
+        <details class="faq" open={i === 0}>
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+      <h2>Plaćanje</h2>
+      <p>{practice.paymentNote}</p>
+      <p>Niste pronašli odgovor? Pišite nam na <a href={`mailto:${practice.email}`}>{practice.email}</a> ili ostavite pitanje u obrascu za zakazivanje.</p>
+      <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin online</a>
+    </div>
+  </section>
+</Base>

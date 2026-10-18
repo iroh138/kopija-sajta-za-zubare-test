@@ -1,0 +1,76 @@
+---
+import { url, abs } from '../lib/url';
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { breadcrumbJsonLd } from '../lib/schema';
+import { practice } from '../lib/practice';
+
+const staff = (await getCollection('staff')).sort((a, b) => a.data.order - b.data.order);
+const members = await Promise.all(staff.map(async (s) => ({ s, Content: (await render(s)).Content })));
+const crumbs = [{ name: 'Početna', path: '/' }, { name: 'O nama', path: '/o-nama' }];
+const site = Astro.site ?? new URL(Astro.url.origin);
+const people = staff.map((s) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: s.data.name,
+  ...(s.data.honorific ? { honorificPrefix: s.data.honorific } : {}),
+  jobTitle: s.data.role,
+  worksFor: { '@id': abs('/#ordinacija', site) },
+  ...(s.data.photo ? { image: abs(s.data.photo.src, site) } : {}),
+}));
+---
+<Base
+  title="O nama"
+  description={`${practice.legalName} na Novom Beogradu: ${practice.yearsActive} godina rada, dr Aleksandra Cicović i pristup bez bola i straha.`}
+  jsonLd={[breadcrumbJsonLd(site, crumbs), ...people]}
+>
+  <PageHeader title="O nama" lead={practice.tagline} crumbs={crumbs} />
+
+  {members.map(({ s, Content }) => (
+    <section class="section">
+      <div class="container about">
+        {s.data.photo && (
+          <div class="arch about__photo">
+            <img src={url(s.data.photo.src)} alt={s.data.photo.alt} width={s.data.photo.width} height={s.data.photo.height} loading="eager" decoding="async" />
+          </div>
+        )}
+        <div class="about__text">
+          <p class="eyebrow">{s.data.role}</p>
+          <h2>{s.data.honorific} {s.data.name}</h2>
+          <Content />
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="section section--tint" aria-labelledby="values-h">
+    <div class="container">
+      <h2 id="values-h">Kako radimo</h2>
+      <ul class="values">
+        {practice.reasons.map((r) => (
+          <li>
+            <h3>{r.title}</h3>
+            <p>{r.body}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="text-align:center">
+      <h2>Na čemu smo najviše ponosni</h2>
+      <p style="margin-inline:auto; font-weight:300; font-size:1.15rem">Kod nas i najplašljiviji pacijenti uspeju da savladaju strah i prvi put dožive stomatologiju bez neprijatnosti. Mnogi navrate i samo da pozdrave doktorku.</p>
+      <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin online</a>
+    </div>
+  </section>
+</Base>
+<style>
+  .about { display: grid; gap: var(--space-4); align-items: center; }
+  @media (min-width: 1024px) { .about { grid-template-columns: 1fr 1.2fr; gap: clamp(3rem, 8vw, 9rem); } }
+  .about__photo { aspect-ratio: 3 / 4; max-width: 32rem; }
+  .about__text :global(p) { font-size: 1.15rem; font-weight: 300; }
+  .values { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+  .values p { font-weight: 300; }
+</style>

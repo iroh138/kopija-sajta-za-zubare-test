@@ -6,7 +6,7 @@ const { title, lead, crumbs = [] } = Astro.props;
 <div class="page-header">
   <div class="container">
     {crumbs.length > 0 && (
-      <nav aria-label="Breadcrumb">
+      <nav aria-label="Putanja">
         <ol class="crumbs">
           {crumbs.map((c, i) => (
             <li>{i < crumbs.length - 1 ? <a href={url(c.path)}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>

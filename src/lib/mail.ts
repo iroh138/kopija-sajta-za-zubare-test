@@ -6,7 +6,7 @@ import type { AppointmentRequest } from './db';
  * The email carries only a reference and contact preference — staff read details in /admin,
  * so personal data is not copied into mailboxes.
  */
-export async function notifyPractice(req: Pick<AppointmentRequest, 'id' | 'preferred_contact' | 'patient_type'>, practiceName: string) {
+export async function notifyPractice(req: Pick<AppointmentRequest, 'id' | 'preferred_contact' | 'patient_type' | 'urgent'>, practiceName: string) {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, NOTIFY_EMAIL, SITE_URL } = process.env;
   if (!SMTP_HOST || !NOTIFY_EMAIL) {
     console.info(`[booking] request #${req.id} stored; email not configured (set SMTP_HOST and NOTIFY_EMAIL).`);
@@ -19,12 +19,13 @@ export async function notifyPractice(req: Pick<AppointmentRequest, 'id' | 'prefe
     auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined,
   });
   const adminUrl = new URL('/admin', SITE_URL ?? 'http://localhost:4321').href;
+  const contact: Record<string, string> = { phone: 'telefonom', text: 'SMS/Viber porukom', email: 'e-mailom' };
   try {
     await transport.sendMail({
       from: SMTP_FROM ?? SMTP_USER,
       to: NOTIFY_EMAIL,
-      subject: `New appointment request #${req.id} – ${practiceName}`,
-      text: `A ${req.patient_type} patient asked to be contacted by ${req.preferred_contact}.\n\nOpen the request list: ${adminUrl}\n`,
+      subject: `${req.urgent ? 'HITNO – ' : ''}Novi zahtev za termin #${req.id} – ${practiceName}`,
+      text: `${req.patient_type === 'new' ? 'Novi' : 'Postojeći'} pacijent želi da ga kontaktirate ${contact[req.preferred_contact] ?? req.preferred_contact}.${req.urgent ? '\nPacijent je označio da ima jak bol (hitno).' : ''}\n\nSpisak zahteva: ${adminUrl}\n`,
     });
     return true;
   } catch (err) {

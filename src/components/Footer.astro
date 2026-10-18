@@ -1,58 +1,58 @@
 ---
 import { url } from '../lib/url';
 import { getCollection } from 'astro:content';
-import { practice, addressLine, hoursRows, upcomingSpecialDates } from '../lib/practice';
+import { practice, addressLine, hoursRows } from '../lib/practice';
 import Logo from './Logo.astro';
 import SocialIcons from './SocialIcons.astro';
 
-const categories = (await getCollection('categories')).sort((a, b) => a.data.order - b.data.order);
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 const hours = hoursRows();
-const nextSpecial = upcomingSpecialDates().find((d) => !d.closed);
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="container">
-    <a href={url("/")} class="site-footer__logo"><Logo size="lg" /></a>
+    <a href={url('/')} class="site-footer__logo"><Logo size="lg" /></a>
 
     <div class="site-footer__grid">
       <div class="site-footer__info">
         <div>
-          <h2 class="site-footer__label">Address:</h2>
-          <p><a href={practice.mapsUrl} data-nap="address">{addressLine()}</a></p>
+          <h2 class="site-footer__label">Adresa:</h2>
+          <p><a href={practice.mapsUrl} rel="noopener" data-nap="address">{addressLine()}</a></p>
         </div>
         <div>
-          <h2 class="site-footer__label">Office hours:</h2>
+          <h2 class="site-footer__label">Radno vreme:</h2>
           <ul class="hours-list" data-nap="hours">
-            {hours.map((h) => <li>{h.day}: {h.text.replace(' – ', ' to ')}</li>)}
+            {hours.map((h) => <li>{h.day}: {h.text}</li>)}
           </ul>
-          {nextSpecial && <p class="muted">Next Saturday clinic: {nextSpecial.pretty}, {nextSpecial.text.replace(' – ', ' to ')}.</p>}
+          {practice.bookingOnly && <p class="muted">Samo uz prethodno zakazivanje.</p>}
         </div>
         <div>
-          <h2 class="site-footer__label">Contact:</h2>
+          <h2 class="site-footer__label">Kontakt:</h2>
           <p>
-            <a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a><br />
-            <a href={`mailto:${practice.email}`}>{practice.email}</a>
+            {practice.phone && <><a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a><br /></>}
+            <a href={`mailto:${practice.email}`}>{practice.email}</a><br />
+            <a href={url('/zakazivanje')}>Zakazivanje online</a>
           </p>
         </div>
         <SocialIcons />
       </div>
 
-      <nav class="site-footer__nav" aria-label="Footer">
+      <nav class="site-footer__nav" aria-label="Meni u podnožju">
         <ul>
-          <li><a href={url('/')}>Home</a></li>
-          <li><a href={url('/about')}>About</a></li>
-          <li><a href={url('/patient-info')}>Patient info</a></li>
-          <li><a href={url('/contact')}>Contact</a></li>
-          <li><a href={url('/privacy')}>Privacy</a></li>
+          <li><a href={url('/')}>Početna</a></li>
+          <li><a href={url('/o-nama')}>O nama</a></li>
+          <li><a href={url('/pitanja')}>Pitanja i odgovori</a></li>
+          <li><a href={url('/kontakt')}>Kontakt</a></li>
+          <li><a href={url('/privatnost')}>Privatnost</a></li>
         </ul>
         <ul>
-          <li><a href={url('/services')}>Services</a></li>
-          {categories.map((c) => <li><a href={url(`/services/${c.id}`)}>{c.data.name}</a></li>)}
+          <li><a href={url('/usluge')}>Usluge</a></li>
+          {services.map((s) => <li><a href={url(`/usluge/${s.id}`)}>{s.data.shortTitle ?? s.data.title}</a></li>)}
         </ul>
       </nav>
     </div>
 
-    <p class="site-footer__copy">© {year} {practice.name}. All rights reserved.</p>
+    <p class="site-footer__copy">© {year} {practice.legalName}. Sva prava zadržana.</p>
   </div>
 </footer>
 <style>

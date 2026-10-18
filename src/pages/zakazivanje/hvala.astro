@@ -1,0 +1,21 @@
+---
+import { url } from '../../lib/url';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { practice } from '../../lib/practice';
+---
+<Base title="Zahtev je primljen" description="Vaš zahtev za termin je primljen." noindex>
+  <PageHeader title="Hvala, zahtev je primljen" lead="Evo šta sledi:">
+    <ol class="steps">
+      <li>Ordinacija pregleda vaš zahtev.</li>
+      <li>Kontaktiramo vas na način koji ste izabrali i dogovaramo termin.</li>
+      <li>Termin važi tek kada ga ordinacija potvrdi.</li>
+    </ol>
+    <p>Ako imate pitanje u međuvremenu, pišite na <a href={`mailto:${practice.email}`}>{practice.email}</a>.</p>
+    <a class="btn btn--secondary" href={url('/')}>Nazad na početnu</a>
+  </PageHeader>
+</Base>
+<style>
+  .steps { padding-left: 1.3rem; margin-bottom: var(--space-3); }
+  .steps li { margin-bottom: 0.4rem; }
+</style>

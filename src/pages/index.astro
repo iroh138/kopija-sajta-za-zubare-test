@@ -6,64 +6,66 @@ import LocationBlock from '../components/LocationBlock.astro';
 import SocialIcons from '../components/SocialIcons.astro';
 import Carousel from '../components/Carousel.astro';
 import { practice } from '../lib/practice';
-import samples from '../data/sample-testimonials.json';
+import faq from '../data/faq.json';
 
-const services = await getCollection('services');
-const featured = services
-  .filter((s) => s.data.featuredOnHome)
-  .sort((a, b) => a.data.order - b.data.order);
-const technology = services
-  .filter((s) => s.data.category.id === 'technology')
-  .sort((a, b) => a.data.order - b.data.order);
-const techImages: Record<string, string> = { 'intraoral-scanner': '/images/tech-scanner.webp', '3d-imaging': '/images/tech-imaging.webp' };
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const featured = services.filter((s) => s.data.featuredOnHome);
 const lead = (await getCollection('staff')).sort((a, b) => a.data.order - b.data.order)[0];
+const doctorName = lead ? `${lead.data.honorific ? lead.data.honorific + ' ' : ''}${lead.data.name}` : '';
 
-const real = (await getCollection('testimonials'))
-  .filter((t) => t.data.consentRecorded && t.data.source)
-  .sort((a, b) => b.data.reviewDate.getTime() - a.data.reviewDate.getTime())
-  .map((t) => ({ ...t.data, sample: false }));
-// Sample reviews appear ONLY in the preview/dev build, visibly labelled. Production shows real, consented reviews or nothing.
-const showSamples = real.length === 0 && (IS_STATIC_PREVIEW || import.meta.env.DEV);
-const reviews = real.length ? real : showSamples ? samples.map((s) => ({ ...s, rating: 5, source: '', sample: true })) : [];
+// Reviews: real, consented, verbatim ones everywhere; a paraphrase awaiting the exact text only in the preview, labelled.
+const reviews = (await getCollection('testimonials'))
+  .filter((t) => t.data.consentRecorded && t.data.source && (t.data.verbatim || IS_STATIC_PREVIEW))
+  .map((t) => t.data);
 
-const insurers = practice.insurers.filter((i) => i.accepted);
-const { city, region } = practice.address;
-const svc = (id: string) => {
-  const s = services.find((x) => x.id === id);
-  return s ? url(`/services/${s.data.category.id}/${s.id}`) : url('/services');
-};
+const gallery = [
+  { src: '/images/ordinacija-1.webp', alt: 'Stomatološka stolica i radno mesto u ordinaciji 3A DENT', caption: 'Radno mesto i stomatološka stolica' },
+  { src: '/images/ordinacija-2.webp', alt: 'Stomatološka jedinica sa ekranom u ordinaciji', caption: 'Stomatološka jedinica sa ekranom' },
+  { src: '/images/ordinacija-3.webp', alt: 'Uredan prostor sa lavaboom i ormarićima u ordinaciji', caption: 'Uredan i čist radni prostor' },
+];
+const homeFaq = faq.slice(0, 4);
+const { city } = practice.address;
 ---
 <Base
-  title={`${practice.specialty} in ${city}, ${region}`}
-  description={`${practice.name} is an ${practice.specialty.toLowerCase()} in ${city}, ${region}. Braces, clear aligners, jaw expansion and airway assessment. Free first consultation.`}
+  title={`Stomatolog ${city} – ${practice.legalName}`}
+  description={`${practice.legalName}, ${practice.address.street}, ${city}. Pregledi, lečenje zuba i kanala, vađenje zuba, čišćenje kamenca i beljenje. Bez bola, uz lokalnu anesteziju. Zakazivanje online.`}
 >
-  <!-- Hero: text left, photo with a large curved edge bleeding off the right -->
+  <!-- Hero -->
   <section class="hero">
     <div class="hero__text">
-      <h1>{practice.specialty} in {city}, {region} for Confident Smiles and Healthy Growth</h1>
+      <h1>Stomatološka ordinacija {practice.name} na Novom Beogradu</h1>
+      <p class="hero__motto">{practice.tagline}</p>
       <div class="btn-row">
-        <a class="btn btn--secondary" href={`tel:${practice.phone.e164}`} data-nap="phone">Call us: {practice.phone.display}</a>
-        <a class="btn btn--primary" href={url('/book')}>Book your appointment</a>
+        <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin online</a>
+        <a class="btn btn--secondary" href={url('/usluge')}>Naše usluge</a>
       </div>
       <div class="hero__social"><SocialIcons /></div>
     </div>
     <div class="hero__media">
-      <img src={url('/images/hero.webp')} alt="Placeholder: orthodontist talking with a patient in the clinic" width="1600" height="1200" fetchpriority="high" decoding="async" />
+      <img src={url('/images/hero.webp')} alt={`${doctorName} u ordinaciji ${practice.name}`} width="1600" height="1200" fetchpriority="high" decoding="async" />
     </div>
   </section>
 
-  <!-- Intro: arched photo left, copy right -->
+  <!-- Intro: arched video left, copy right -->
   <section class="section" aria-labelledby="intro-h">
     <div class="container split split--media-left">
-      <div class="arch split__media">
-        <img src={url('/images/intro.webp')} alt="Placeholder: smiling patient in the treatment chair" width="900" height="1100" loading="lazy" decoding="async" />
+      <div class="arch split__media video-arch">
+        <video id="office-video" poster={url('/images/video-poster.webp')} muted loop playsinline preload="none" width="720" height="880" aria-label="Kratak video šetnje kroz ordinaciju">
+          <source src={url('/video/ordinacija.webm')} type="video/webm" />
+          <source src={url('/video/ordinacija.mp4')} type="video/mp4" />
+        </video>
+        <button type="button" class="video-toggle" data-video-toggle aria-pressed="false">
+          <span class="visually-hidden" data-label>Pusti video</span>
+          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>
+        </button>
       </div>
       <div class="split__body">
-        <h2 id="intro-h">Planned Around Your Whole Face, Not Just Your Teeth</h2>
-        <p>At {practice.name} we look at how teeth, jaws and breathing work together before we plan anything. Treatment options include <a class="text-link" href={svc('clear-aligners')}>clear aligners</a>, <a class="text-link" href={svc('braces')}>braces</a> and <a class="text-link" href={svc('airway-assessment')}>airway assessment</a>.</p>
-        <p>We are based in {city} and see patients from {practice.serviceAreas.slice(1, -1).join(', ')} and {practice.serviceAreas.at(-1)}.</p>
-        {lead && <p>Your care is led by <a class="text-link" href={url('/about/team')}>{lead.data.name}</a>, who uses <a class="text-link" href={svc('3d-imaging')}>3D imaging</a> to measure before planning, so every recommendation is based on your own anatomy.</p>}
-        <a class="btn btn--secondary" href={url('/about')}>About {practice.name}</a>
+        <h2 id="intro-h">Zubar kojeg ćete voleti</h2>
+        <p>{practice.legalName} na Novom Beogradu brine o zubima odraslih i dece već {practice.yearsActive} godina. Radimo <a class="text-link" href={url('/usluge/preventiva-i-dijagnostika')}>preglede i čišćenje</a>, <a class="text-link" href={url('/usluge/lecenje-zuba')}>lečenje zuba</a>, <a class="text-link" href={url('/usluge/endodoncija')}>lečenje kanala</a> i <a class="text-link" href={url('/usluge/oralna-hirurgija')}>vađenje zuba</a>.</p>
+        {lead && <p>Ordinaciju vodi <a class="text-link" href={url('/o-nama')}>{doctorName}</a>, doktor opšte stomatologije sa više od decenije i po iskustva. Najviše se ponosimo time što kod nas i najplašljiviji pacijenti savladaju strah, a mnogi navrate samo da pozdrave doktorku.</p>}
+        <p>Sve intervencije radimo u lokalnoj anesteziji, a pre uboda nanosimo gel, tako da ne boli ni sam ubod.</p>
+        <a class="btn btn--secondary" href={url('/o-nama')}>O ordinaciji</a>
       </div>
     </div>
   </section>
@@ -71,140 +73,162 @@ const svc = (id: string) => {
   <!-- Services: ruled background, pill links -->
   <section class="section ruled" aria-labelledby="services-h">
     <div class="container">
-      <h2 id="services-h">Treatment That Looks Beyond Alignment</h2>
-      <p class="wide">We focus on function as well as appearance: how the bite works, how the jaw is growing and how easily you breathe. Patients come to us from {practice.serviceAreas.slice(0, 4).join(', ')} and nearby towns.</p>
-      <h3 class="ruled__sub">What we treat:</h3>
+      <h2 id="services-h">Kompletna nega zuba na jednom mestu</h2>
+      <p class="wide">Od prvog pregleda i čišćenja kamenca do lečenja kanala i vađenja zuba. Implante i ortodonciju ne radimo; za te tretmane vas upućujemo proverenim kolegama specijalistima.</p>
+      <h3 class="ruled__sub">Naše usluge:</h3>
       <ul class="pill-grid">
         {featured.map((s) => (
-          <li><a class="btn btn--secondary pill" href={url(`/services/${s.data.category.id}/${s.id}`)}>{s.data.title}</a></li>
+          <li><a class="btn btn--secondary pill" href={url(`/usluge/${s.id}`)}>{s.data.shortTitle ?? s.data.title}</a></li>
         ))}
       </ul>
-      <a class="btn btn--primary" href={url('/services')}>See all treatments</a>
+      <a class="btn btn--primary" href={url('/usluge')}>Sve usluge</a>
     </div>
   </section>
 
-  <!-- Technology: copy left, carousel of photo cards right -->
-  {technology.length > 0 && (
-    <section class="section tech" aria-labelledby="tech-h">
-      <div class="tech__inner">
-        <div class="tech__text">
-          <h2 id="tech-h">Measured Precisely, Planned Personally</h2>
-          <p>Digital scans and 3D imaging replace guesswork, so we can show you the plan before treatment starts.</p>
-          <a class="btn btn--secondary" href={url('/services/technology')}>Our technology</a>
-        </div>
-        <div class="tech__carousel">
-          <Carousel label="Our technology">
-            {technology.map((s) => (
-              <li class="tech-card">
-                <img src={url(techImages[s.id] ?? '/images/tech-scanner.webp')} alt="" width="900" height="900" loading="lazy" decoding="async" />
-                <div class="tech-card__body">
-                  <h3><a href={url(`/services/technology/${s.id}`)}>{s.data.title}</a></h3>
-                  <p>{s.data.summary}</p>
-                </div>
-              </li>
-            ))}
-          </Carousel>
-        </div>
+  <!-- Office gallery: copy left, photo carousel right -->
+  <section class="section tech" aria-labelledby="office-h">
+    <div class="tech__inner">
+      <div class="tech__text">
+        <h2 id="office-h">Prostor u kom se osećate opušteno</h2>
+        <p>Svetla, uredna ordinacija sa savremenom stomatološkom jedinicom. Sve intervencije izvodimo u sterilnim uslovima.</p>
+        <a class="btn btn--secondary" href={url('/kontakt')}>Kako do nas</a>
       </div>
-    </section>
-  )}
+      <div class="tech__carousel">
+        <Carousel label="Fotografije ordinacije">
+          {gallery.map((g) => (
+            <li class="photo-card">
+              <figure>
+                <img src={url(g.src)} alt={g.alt} width="900" height="900" loading="lazy" decoding="async" />
+                <figcaption>{g.caption}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </Carousel>
+      </div>
+    </div>
+  </section>
 
-  <!-- Why choose: reasons left, arched portrait right -->
+  <!-- Why us: reasons left, arched portrait right -->
   <section class="section" aria-labelledby="why-h">
     <div class="container split split--media-right">
       <div class="split__body">
-        <h2 id="why-h">What Makes Our Care Different</h2>
+        <h2 id="why-h">Zašto nas pacijenti biraju</h2>
         {practice.reasons.map((r) => (
           <div class="reason">
             <h3>{r.title}</h3>
             <p>{r.body}</p>
           </div>
         ))}
-        <a class="btn btn--secondary" href={url('/about/team')}>Meet the team</a>
+        <a class="btn btn--secondary" href={url('/o-nama')}>Upoznajte doktorku</a>
       </div>
-      <div class="arch split__media split__media--tall">
-        <img src={url('/images/doctor.webp')} alt={lead ? `Placeholder portrait of ${lead.data.name}` : 'Placeholder portrait of the orthodontist'} width="900" height="1200" loading="lazy" decoding="async" />
+      {lead?.data.photo && (
+        <div class="arch split__media split__media--tall">
+          <img src={url(lead.data.photo.src)} alt={lead.data.photo.alt} width={lead.data.photo.width} height={lead.data.photo.height} loading="lazy" decoding="async" />
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  {reviews.length > 0 && (
+    <section class="section" aria-labelledby="reviews-h">
+      <div class="container">
+        <h2 id="reviews-h">Utisci pacijenata</h2>
+        <ul class="review-grid">
+          {reviews.map((t) => (
+            <li class="review">
+              <figure>
+                {t.rating && (
+                  <p class="review__stars" role="img" aria-label={`Ocena ${t.rating} od 5`}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class:list={[{ off: i >= (t.rating ?? 0) }]}><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>
+                    ))}
+                  </p>
+                )}
+                <blockquote><p>{t.body}</p></blockquote>
+                <figcaption>
+                  <strong>{t.author}</strong>
+                  {!t.verbatim && <span class="review__tag">Parafraza – za proveru</span>}
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA -->
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="container cta__inner">
+      <h2 id="cta-h">Plašite se zubara?</h2>
+      <p>Niste jedini, i zato radimo polako, uz lokalnu anesteziju i objašnjenje svakog koraka. Kod nas i najplašljiviji pacijenti prvi put dožive stomatologiju bez neprijatnosti.</p>
+      <a class="btn btn--secondary" href={url('/zakazivanje')}>Zakažite prvi pregled</a>
+    </div>
+  </section>
+
+  <!-- FAQ teaser + payment -->
+  <section class="section" aria-labelledby="faq-h">
+    <div class="container split split--top">
+      <div class="split__body">
+        <h2 id="faq-h">Pitanja i odgovori</h2>
+        <p>{practice.paymentNote}</p>
+        <a class="btn btn--secondary" href={url('/pitanja')}>Sva pitanja</a>
+      </div>
+      <div class="faq-list">
+        {homeFaq.map((f) => (
+          <details class="faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
       </div>
     </div>
   </section>
 
-  <!-- Testimonials -->
-  {reviews.length > 0 && (
-    <section class="section" aria-labelledby="reviews-h">
-      <div class="container">
-        <h2 id="reviews-h">What Our Patients Say</h2>
-        {showSamples && <p class="muted">Sample reviews shown in this preview only. Replace with real, consented reviews.</p>}
-        <div class="reviews">
-          <Carousel label="Patient reviews" dots controlsAlign="split">
-            {reviews.map((t) => (
-              <li class="review">
-                <figure>
-                  <p class="review__stars" role="img" aria-label={`Rated ${t.rating} out of 5`}>
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <svg viewBox="0 0 24 24" aria-hidden="true" class:list={[{ off: i >= t.rating }]}><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>
-                    ))}
-                  </p>
-                  <blockquote><p>{t.body}</p></blockquote>
-                  <figcaption>
-                    <strong>{t.author}</strong>
-                    {t.sample && <span class="review__tag">Sample</span>}
-                    {!t.sample && 'source' in t && t.source && <span class="muted"> · {t.source}</span>}
-                  </figcaption>
-                </figure>
-              </li>
-            ))}
-          </Carousel>
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Consultation CTA on a soft gradient -->
-  {practice.freeConsultation.offered && (
-    <section class="cta" aria-labelledby="cta-h">
-      <div class="container cta__inner">
-        <h2 id="cta-h">Not Sure What You Need Yet?</h2>
-        <p>{practice.freeConsultation.note} Whether you are asking about crowding, jaw expansion or breathing during sleep, a short conversation is the best first step.</p>
-        <a class="btn btn--secondary" href={url('/book')}>Book a free consultation</a>
-      </div>
-    </section>
-  )}
-
-  <!-- Insurance: text left, logo tiles right -->
-  {(insurers.length > 0 || practice.payments.length > 0) && (
-    <section class="section" aria-labelledby="pay-h">
-      <div class="container split">
-        <div class="split__body">
-          <h2 id="pay-h">Insurance and Ways to Pay</h2>
-          <p>We work with a range of dental plans and offer monthly payment plans, so cost does not stand between you and care.</p>
-          <ul class="pay-list">{practice.payments.map((p) => <li><strong>{p.name}.</strong> {p.description}</li>)}</ul>
-          <a class="btn btn--secondary" href={url('/patient-info')}>Check your coverage</a>
-        </div>
-        {insurers.length > 0 && (
-          <ul class="logo-grid" aria-label="Insurance plans we accept">
-            {insurers.map((i) => <li class="logo-tile">{i.name}</li>)}
-          </ul>
-        )}
-      </div>
-    </section>
-  )}
-
-  <section class="section section--tint" aria-label="Location and hours">
+  <section class="section section--tint" aria-label="Lokacija i radno vreme">
     <div class="container">
       <LocationBlock />
     </div>
   </section>
 </Base>
 
+<script>
+  // Video plays only on request or when in view (and never with reduced motion); always pausable.
+  const video = document.getElementById('office-video') as HTMLVideoElement | null;
+  const btn = document.querySelector<HTMLButtonElement>('[data-video-toggle]');
+  const label = btn?.querySelector('[data-label]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sync = () => {
+    const playing = !!video && !video.paused;
+    btn?.setAttribute('aria-pressed', String(playing));
+    if (label) label.textContent = playing ? 'Pauziraj video' : 'Pusti video';
+  };
+  let userPaused = false;
+  btn?.addEventListener('click', () => {
+    if (!video) return;
+    if (video.paused) { userPaused = false; video.play(); } else { userPaused = true; video.pause(); }
+  });
+  video?.addEventListener('play', sync);
+  video?.addEventListener('pause', sync);
+  if (video && !reduce && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !userPaused) video.play().catch(() => {});
+      else if (!e.isIntersecting) video.pause();
+    }, { threshold: 0.4 }).observe(video);
+  }
+</script>
+
 <style>
   /* Hero */
   .hero { display: grid; gap: var(--space-4); padding-top: var(--space-3); }
   .hero__text { padding-inline: 1rem; }
-  .hero__text h1 { margin-bottom: var(--space-4); }
+  .hero__text h1 { margin-bottom: var(--space-3); }
+  .hero__motto { font-size: var(--step-1); font-weight: 300; color: var(--color-ink); margin-bottom: var(--space-4); }
   .hero__social { margin-top: var(--space-4); }
-  .hero__media img { width: 100%; height: 100%; object-fit: cover; border-top-left-radius: 50% 45%; border-bottom-left-radius: 50% 45%; aspect-ratio: 4 / 3; }
+  .hero__media img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 30%; border-top-left-radius: 50% 45%; border-bottom-left-radius: 50% 45%; aspect-ratio: 4 / 3; }
   @media (min-width: 1024px) {
-    .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: var(--space-5); padding-top: var(--space-5); }
+    .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: var(--space-5); padding-top: var(--space-4); }
     .hero__text { padding-left: var(--edge); padding-right: 0; }
     .hero__media img { aspect-ratio: auto; min-height: 44rem; border-top-left-radius: 46% 52%; border-bottom-left-radius: 46% 52%; }
   }
@@ -212,14 +236,25 @@ const svc = (id: string) => {
   /* Two-column photo + copy */
   .split__body p { font-size: 1.15rem; font-weight: 300; }
   .split { display: grid; gap: var(--space-4); align-items: center; }
+  .split--top { align-items: start; }
   .split__media { aspect-ratio: 9 / 11; max-width: 44rem; width: 100%; }
   .split__media--tall { aspect-ratio: 3 / 4; }
   .split__body > :last-child { margin-bottom: 0; }
   @media (min-width: 1024px) {
     .split { grid-template-columns: 1fr 1fr; gap: clamp(3rem, 10vw, 12rem); }
-    .split--media-left .split__media { order: 0; }
     .split--media-right .split__media { justify-self: end; }
   }
+
+  /* Arched video */
+  .video-arch { position: relative; background: var(--color-tint); }
+  .video-arch video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .video-toggle {
+    position: absolute; right: 1.25rem; bottom: 1.25rem; width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer;
+    display: grid; place-items: center; background: rgb(255 255 255 / 0.92); color: var(--color-ink); box-shadow: var(--shadow);
+  }
+  .video-toggle svg { width: 24px; height: 24px; grid-area: 1 / 1; }
+  .video-toggle .icon-pause, .video-toggle[aria-pressed='true'] .icon-play { display: none; }
+  .video-toggle[aria-pressed='true'] .icon-pause { display: block; }
 
   /* Ruled paper background */
   .ruled {
@@ -233,7 +268,7 @@ const svc = (id: string) => {
   @media (min-width: 1100px) { .pill-grid { grid-template-columns: repeat(3, 1fr); } }
   .pill { width: 100%; background: var(--color-surface); }
 
-  /* Technology */
+  /* Office gallery (layout from the reference's technology section) */
   .tech__inner { display: grid; gap: var(--space-4); }
   .tech__text { padding-inline: 1rem; }
   .tech__carousel { padding-left: 1rem; --slide-width: min(85%, 34rem); }
@@ -242,27 +277,19 @@ const svc = (id: string) => {
     .tech__text { padding-left: var(--edge); padding-right: 0; align-self: center; padding-bottom: 6rem; }
     .tech__carousel { padding-left: 0; }
   }
-  .tech-card { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 2px; }
-  .tech-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .tech-card__body {
-    position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; text-align: center;
-    padding: var(--space-4) var(--space-3); color: #fff;
-    background: linear-gradient(180deg, rgb(107 75 179 / 0.72), rgb(84 58 150 / 0.82));
+  .photo-card figure { position: relative; margin: 0; aspect-ratio: 1; overflow: hidden; border-radius: 2px; }
+  .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-card figcaption {
+    position: absolute; inset: auto 0 0 0; padding: 3rem 1.5rem 1.25rem; color: #fff; font-size: 1.15rem; font-weight: 400;
+    background: linear-gradient(180deg, rgb(43 34 70 / 0), rgb(43 34 70 / 0.85));
   }
-  .tech-card h3 { color: #fff; font-size: var(--step-2); }
-  .tech-card h3 a { color: inherit; text-decoration: none; }
-  .tech-card h3 a::after { content: ''; position: absolute; inset: 0; }
-  .tech-card h3 a:focus-visible { outline: none; }
-  .tech-card:has(a:focus-visible) { outline: var(--focus-ring); outline-offset: 3px; }
-  .tech-card p { margin-inline: auto; font-weight: 300; }
 
-  /* Why choose */
+  /* Why us */
   .reason h3 { font-size: var(--step-2); }
   .reason p { font-weight: 300; }
 
   /* Reviews */
-  .reviews { --slide-width: min(88%, 31rem); --carousel-gap: 3.75rem; margin-top: var(--space-4); }
-  @media (max-width: 640px) { .reviews { --carousel-gap: 1rem; } }
+  .review-grid { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 36rem)); }
   .review figure { margin: 0; height: 100%; display: flex; flex-direction: column; background: var(--color-card); padding: var(--space-4) var(--space-4) var(--space-3); }
   .review blockquote { margin: 0; flex: 1; }
   .review blockquote p { font-size: 1.2rem; font-weight: 300; line-height: 1.75; color: var(--color-ink); }
@@ -270,16 +297,11 @@ const svc = (id: string) => {
   .review__stars svg { width: 30px; height: 30px; fill: var(--color-star); }
   .review__stars svg.off { fill: #d9d6e0; }
   .review figcaption { color: var(--color-ink); }
-  .review__tag { margin-left: 0.6rem; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--color-tint-2); color: var(--color-accent-strong); }
+  .review__tag { margin-left: 0.6rem; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.15rem 0.6rem; border-radius: 999px; background: #fef3c7; color: #78350f; }
 
   /* CTA */
   .cta { background: linear-gradient(180deg, #ffffff 0%, var(--color-tint) 40%, var(--color-tint-2) 100%); padding-block: var(--space-6); text-align: center; }
   .cta__inner { display: flex; flex-direction: column; align-items: center; }
-  .cta p { max-width: 62rem; font-weight: 300; }
+  .cta p { max-width: 62rem; font-weight: 300; font-size: 1.15rem; }
 
-  /* Insurance */
-  .pay-list { padding-left: 1.2rem; margin: 0 0 var(--space-4); }
-  .pay-list li { margin-bottom: 0.4rem; }
-  .logo-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
-  .logo-tile { display: grid; place-items: center; min-height: 7rem; padding: 1rem; text-align: center; font-size: 1.15rem; font-weight: 500; color: var(--color-muted); border: 1px dashed var(--color-divider); border-radius: var(--radius-sm); background: var(--color-tint); }
 </style>

@@ -1,0 +1,14 @@
+[
+  { "q": "Da li će boleti?", "a": "Ne. Sve intervencije rade se u lokalnoj anesteziji, a pre uboda nanosimo anestetički gel, tako da ne boli ni sam ubod." },
+  { "q": "Kako da zakažem termin?", "a": "Termin se zakazuje isključivo online, preko obrasca na ovom sajtu. Ordinacija vam potom potvrđuje termin." },
+  { "q": "Primate li pacijente bez zakazivanja?", "a": "Uglavnom ne. Bez zakazivanja primamo samo ako se termin slučajno oslobodi, što je retko." },
+  { "q": "Imate li hitnu službu?", "a": "Nemamo dežurstvo 24/7, ali u radno vreme pružamo prvu pomoć i dajemo prednost pacijentima sa jakim bolom. U obrascu za zakazivanje označite da je hitno." },
+  { "q": "Da li mogu da dobijem anesteziju?", "a": "Da, uvek, osim ako postoji kontraindikacija ili alergija na anestetik." },
+  { "q": "Koliko traje intervencija?", "a": "Plomba obično traje oko sat vremena. Trajanje vađenja umnjaka zavisi od položaja zuba i složenosti zahvata." },
+  { "q": "Kada smem da jedem posle intervencije?", "a": "Tek kada anestezija prestane da deluje. Za veće zahvate dobijate posebna uputstva." },
+  { "q": "Da li lečite decu?", "a": "Da. Deci pristupamo strpljivo, kako bi od prvog pregleda stekla pozitivan stav prema zubaru." },
+  { "q": "Da li radite preko zdravstvenog osiguranja?", "a": "Ne. Ne sarađujemo sa državnim zdravstvenim osiguranjem (RFZO); sve usluge su privatne." },
+  { "q": "Koliko koštaju usluge?", "a": "Cena zavisi od tretmana. Tačnu informaciju dobijate na pregledu ili u odgovoru na zahtev za termin." },
+  { "q": "Radite li vikendom?", "a": "Ne. Radimo radnim danima: ponedeljkom, sredom i petkom od 13 do 21 h, utorkom i četvrtkom od 8 do 16 h." },
+  { "q": "Da li radite krunice, mostove, proteze i implante?", "a": "Radimo privremene krunice, mostove i proteze, kao i popravke proteza. Implante i ortodonciju ne radimo; za njih vas upućujemo kolegama specijalistima." }
+]

@@ -7,11 +7,11 @@ import { url } from '../lib/url';
 const gtmId = import.meta.env.PUBLIC_GTM_ID as string | undefined;
 ---
 {gtmId && (
-  <div id="consent" class="consent" role="region" aria-label="Cookie consent" hidden data-gtm={gtmId}>
-    <p>We use analytics cookies to understand how the site is used. Nothing is loaded unless you agree. <a href={url('/privacy')}>Privacy</a></p>
+  <div id="consent" class="consent" role="region" aria-label="Saglasnost za kolačiće" hidden data-gtm={gtmId}>
+    <p>Koristimo analitičke kolačiće da bismo razumeli kako se sajt koristi. Ništa se ne učitava bez vaše saglasnosti. <a href={url('/privatnost')}>Privatnost</a></p>
     <div class="btn-row">
-      <button type="button" class="btn btn--primary" data-consent="granted">Accept analytics</button>
-      <button type="button" class="btn btn--secondary" data-consent="denied">Decline</button>
+      <button type="button" class="btn btn--primary" data-consent="granted">Prihvatam</button>
+      <button type="button" class="btn btn--secondary" data-consent="denied">Odbijam</button>
     </div>
   </div>
 )}

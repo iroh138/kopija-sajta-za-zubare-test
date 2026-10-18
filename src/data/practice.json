@@ -1,56 +1,51 @@
 {
-  "name": "Sample Orthodontics",
-  "tagline": "Orthodontic care planned around how you breathe, bite and grow",
-  "specialty": "Orthodontist",
-  "phone": { "display": "(201) 555-0142", "e164": "+12015550142" },
-  "email": "hello@example.com",
+  "name": "3A DENT",
+  "legalName": "Ordinacija opšte stomatologije 3A DENT",
+  "tagline": "Bez bola. Bez straha. Bez brige. Zubar kojeg ćete voleti.",
+  "specialty": "Stomatološka ordinacija",
+  "phone": null,
+  "email": "aleksandra.cicovic@gmail.com",
   "address": {
-    "street": "100 Example Avenue",
-    "unit": "Suite 4",
-    "city": "Anytown",
-    "region": "NJ",
-    "postalCode": "00000",
-    "country": "US"
+    "street": "Jurija Gagarina 155a",
+    "city": "Novi Beograd",
+    "region": "Beograd",
+    "postalCode": "11070",
+    "country": "RS"
   },
-  "geo": { "lat": 40.0, "lng": -75.0 },
-  "mapsUrl": "https://www.openstreetmap.org/?mlat=40.00000&mlon=-75.00000#map=17/40.00000/-75.00000",
+  "geo": null,
+  "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Jurija%20Gagarina%20155a%2C%2011070%20Novi%20Beograd",
+  "mapEmbedQuery": "Jurija Gagarina 155a, 11070 Novi Beograd, Srbija",
   "profileUrl": "",
-  "social": [
-    { "network": "Facebook", "url": "https://www.facebook.com/" },
-    { "network": "Instagram", "url": "https://www.instagram.com/" }
-  ],
+  "social": [],
+  "bookingOnly": true,
   "acceptingNewPatients": true,
+  "yearsActive": 15,
   "freeConsultation": {
-    "offered": true,
-    "note": "Your first orthodontic consultation is free. We explain what we can and cannot treat, with no obligation."
+    "offered": false,
+    "note": ""
   },
   "hours": [
-    { "day": 1, "opens": "08:45", "closes": "17:00" },
-    { "day": 2, "opens": "08:45", "closes": "17:30" },
-    { "day": 3, "opens": "10:00", "closes": "18:00" },
-    { "day": 4, "closed": true },
-    { "day": 5, "opens": "08:45", "closes": "17:00" },
+    { "day": 1, "opens": "13:00", "closes": "21:00" },
+    { "day": 2, "opens": "08:00", "closes": "16:00" },
+    { "day": 3, "opens": "13:00", "closes": "21:00" },
+    { "day": 4, "opens": "08:00", "closes": "16:00" },
+    { "day": 5, "opens": "13:00", "closes": "21:00" },
     { "day": 6, "closed": true },
     { "day": 7, "closed": true }
   ],
-  "specialDates": [
-    { "date": "2026-11-14", "opens": "08:00", "closes": "14:00", "label": "Saturday clinic" },
-    { "date": "2026-12-12", "opens": "08:00", "closes": "14:00", "label": "Saturday clinic" },
-    { "date": "2026-12-24", "closed": true, "label": "Holiday closure" }
-  ],
-  "serviceAreas": ["Anytown", "Riverside", "Hillcrest", "Oak Park", "Lakeview", "Maple Grove"],
-  "insurers": [
-    { "name": "Example Dental Plan A", "accepted": true },
-    { "name": "Example Dental Plan B", "accepted": true }
-  ],
-  "payments": [
-    { "name": "Monthly payment plans", "description": "Spread treatment cost over the length of treatment, interest-free." },
-    { "name": "Cards and HSA/FSA", "description": "Major credit and debit cards and health savings accounts." }
+  "specialDates": [],
+  "serviceAreas": ["Novi Beograd", "Beograd"],
+  "insurers": [],
+  "payments": [],
+  "paymentNote": "Sve usluge su privatne. Ordinacija ne radi preko državnog zdravstvenog osiguranja (RFZO). Cena zavisi od tretmana; tačnu informaciju dobijate na pregledu ili u odgovoru na zahtev za termin.",
+  "notOffered": [
+    { "name": "Implantologija", "note": "Za ugradnju implanata upućujemo pacijente u specijalizovane centre." },
+    { "name": "Ortodoncija (proteze za ispravljanje zuba)", "note": "Za ortodontsku terapiju upućujemo pacijente kolegama specijalistima." }
   ],
   "reasons": [
-    { "title": "We look for the cause", "body": "We check jaw growth, tongue posture and breathing before we plan tooth movement." },
-    { "title": "We measure, then plan", "body": "3D scans replace guesswork and messy impressions." },
-    { "title": "Earlier can mean simpler", "body": "For growing children, guiding development now can shorten treatment later." },
-    { "title": "A plan that is yours", "body": "You get a written plan with timelines and costs before anything starts." }
+    { "title": "Bez bola", "body": "Svi zahvati rade se u lokalnoj anesteziji, a pre uboda nanosimo gel, tako da ne boli ni sam ubod." },
+    { "title": "Bez straha", "body": "Kod nas i najplašljiviji pacijenti savladaju strah i prvi put dožive stomatologiju bez neprijatnosti." },
+    { "title": "Bez brige", "body": "Pre svakog zahvata objasnimo šta radimo i zašto, i radimo nežno i bez žurbe." },
+    { "title": "I za najmlađe", "body": "Deci pristupamo strpljivo, kako bi od prve posete stekla pozitivan stav prema zubaru." }
   ]
 }

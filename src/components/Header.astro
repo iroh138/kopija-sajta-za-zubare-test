@@ -4,55 +4,49 @@ import { getCollection } from 'astro:content';
 import { practice } from '../lib/practice';
 import Logo from './Logo.astro';
 
-const categories = (await getCollection('categories')).sort((a, b) => a.data.order - b.data.order);
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 const path = Astro.url.pathname;
-const here = (href: string) => (path.replace(/\/$/, '') || '/') === url(href).replace(/\/$/, '') || (href === '/' && path === url('/'));
+const here = (href: string) => (path.replace(/\/$/, '') || '/') === (url(href).replace(/\/$/, '') || '/');
 
-// Menu groups shown in the overlay panel (hamburger at every width, like the analysed site).
+// Menu groups shown in the panel (hamburger at every width, like the reference layout).
 const groups = [
   {
-    title: 'Practice',
+    title: 'Ordinacija',
     links: [
-      { label: 'Home', href: '/' },
-      { label: 'About us', href: '/about' },
-      { label: 'Meet the team', href: '/about/team' },
-      { label: 'Blog', href: '/about/blog' },
+      { label: 'Početna', href: '/' },
+      { label: 'O nama', href: '/o-nama' },
+      { label: 'Pitanja i odgovori', href: '/pitanja' },
+      { label: 'Kontakt', href: '/kontakt' },
     ],
   },
   {
-    title: 'Services',
+    title: 'Usluge',
     links: [
-      ...categories.map((c) => ({ label: c.data.name, href: `/services/${c.id}` })),
-      { label: 'All services', href: '/services' },
-    ],
-  },
-  {
-    title: 'Patients',
-    links: [
-      { label: 'Patient info', href: '/patient-info' },
-      { label: 'Contact', href: '/contact' },
-      { label: 'Book a visit', href: '/book' },
+      ...services.map((s) => ({ label: s.data.shortTitle ?? s.data.title, href: `/usluge/${s.id}` })),
+      { label: 'Sve usluge', href: '/usluge' },
     ],
   },
 ];
 ---
 <header class="site-header">
   <div class="container site-header__inner">
-    <a class="brand" href={url("/")}>
+    <a class="brand" href={url('/')}>
       <Logo />
     </a>
 
     <div class="site-header__actions">
-      <a class="btn btn--secondary header-cta" href={`tel:${practice.phone.e164}`} data-nap="phone">Call us: {practice.phone.display}</a>
-      <a class="btn btn--primary header-cta" href={url('/book')}>Book your appointment</a>
+      {practice.phone && (
+        <a class="btn btn--secondary header-cta" href={`tel:${practice.phone.e164}`} data-nap="phone">Pozovite: {practice.phone.display}</a>
+      )}
+      <a class="btn btn--primary header-cta" href={url('/zakazivanje')}>Zakažite termin online</a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
-        <span class="visually-hidden">Menu</span>
+        <span class="visually-hidden">Meni</span>
         <span class="menu-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
       </button>
     </div>
   </div>
 
-  <nav id="site-menu" class="site-menu" aria-label="Main" hidden>
+  <nav id="site-menu" class="site-menu" aria-label="Glavni meni" hidden>
     <div class="container site-menu__grid">
       {groups.map((g) => (
         <div>
@@ -65,8 +59,10 @@ const groups = [
         </div>
       ))}
       <div class="site-menu__contact">
-        <p class="site-menu__title">Get in touch</p>
-        <p><a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a><br /><a href={`mailto:${practice.email}`}>{practice.email}</a></p>
+        <p class="site-menu__title">Zakazivanje</p>
+        <p>Termini se zakazuju isključivo online.</p>
+        <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin</a>
+        <p class="site-menu__mail"><a href={`mailto:${practice.email}`}>{practice.email}</a></p>
       </div>
     </div>
   </nav>
@@ -90,8 +86,8 @@ const groups = [
 <style>
   .site-header { background: var(--color-surface); position: relative; z-index: 50; }
   .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 6rem; }
-  @media (min-width: 900px) { .site-header__inner { min-height: 9rem; } }
-  .brand { text-decoration: none; }
+  @media (min-width: 900px) { .site-header__inner { min-height: 8.5rem; } }
+  .brand { text-decoration: none; display: inline-block; }
   .site-header__actions { display: flex; align-items: center; gap: 1.1rem; }
   .header-cta { display: none; }
   @media (min-width: 1024px) { .header-cta { display: inline-flex; } }
@@ -104,10 +100,11 @@ const groups = [
   .menu-toggle[aria-expanded='true'] .menu-toggle__bars span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
   .site-menu { position: absolute; inset: 100% 0 auto 0; background: var(--color-surface); border-top: 1px solid var(--color-divider); box-shadow: 0 24px 40px rgb(30 22 51 / 0.08); max-height: calc(100dvh - 6rem); overflow: auto; }
-  .site-menu__grid { display: grid; gap: var(--space-4); padding-block: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+  .site-menu__grid { display: grid; gap: var(--space-4); padding-block: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
   .site-menu__title { font-size: var(--step--1); font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); margin-bottom: var(--space-1); }
   .site-menu ul { list-style: none; margin: 0; padding: 0; }
-  .site-menu li a { display: inline-flex; align-items: center; min-height: 44px; font-size: 1.35rem; font-weight: 300; color: var(--color-ink); text-decoration: none; }
+  .site-menu li a { display: inline-flex; align-items: center; min-height: 44px; font-size: 1.3rem; font-weight: 300; color: var(--color-ink); text-decoration: none; }
   .site-menu li a:hover, .site-menu li a[aria-current='page'] { color: var(--color-accent); }
-  .site-menu__contact a { color: var(--color-ink); }
+  .site-menu__mail { margin-top: var(--space-2); }
+  .site-menu__mail a { color: var(--color-ink); }
 </style>
