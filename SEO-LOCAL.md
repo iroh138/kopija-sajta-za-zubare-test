@@ -51,17 +51,20 @@ Namerno **nije** urađeno:
 | Srednje | Ostali srpski imenici sa istim NAP-om (pre upisa proveriti da su aktivni i relevantni). |
 | Srednje | Lokalni linkovi i pominjanja: lokalni portali Novog Beograda, saradnje (vrtići/škole u kvartu), stručna udruženja. |
 
-## Sadržaj – najveća slabost na samom sajtu
+## Sadržaj strana usluga
 
-Strane usluga imaju **23–40 reči** teksta (bez liste podusluga). `seo-local` navodi posebne strane usluga kao
-faktor #1 za lokalni organski rezultat, ali one moraju da imaju sadržaj. Predlog po strani (300–600 reči, od doktorke,
-ne generički tekst):
+Ranije su strane usluga imale samo **23–40 reči** teksta. Sada svaka strana ima **~330–430 reči** glavnog sadržaja, računajući listu podusluga i pitanja:
 
-- kada je usluga potrebna (simptomi kojima pacijent traži: „boli me zub na hladno", „otekla desna"…);
-- kako izgleda tretman u ovoj ordinaciji, korak po korak, i koliko traje;
-- šta posle (oporavak, ishrana, kontrola);
-- 2–4 pitanja koja pacijenti stvarno postavljaju (već postoji polje `faqs`);
-- opciono: fotografije iz ordinacije.
+- kada je usluga potrebna, opisano simptomima kojima pacijenti pretražuju;
+- kako izgleda tretman u ovoj ordinaciji;
+- šta posle tretmana;
+- 2–3 kontekstualna linka na srodne usluge i na zakazivanje.
+
+Tekst se oslanja isključivo na podatke koji već postoje na sajtu (podusluge, pitanja, pristup ordinacije) i na opšteprihvaćena stomatološka znanja. Nema trajanja, cena ni materijala koje ordinacija nije navela.
+
+**Status: nacrt.** Svaka datoteka u `src/content/services/` ima polje `reviewStatus`, koje se ne prikazuje na sajtu. Doktorka treba da pregleda tekst pre objave. Posebno treba da potvrdi rečenice o upućivanju kolegama za složenije hirurške i parodontološke slučajeve, kao i opis beljenja. Posle pregleda polje treba obrisati.
+
+Ispravka: naslov strane protetike je promenjen u „Popravka proteza i privremene krunice". Prethodni naslov („Proteze, krunice i mostovi") obećavao je trajne radove koje ordinacija ne radi.
 
 ## Tehnički preduslovi pri puštanju u rad
 

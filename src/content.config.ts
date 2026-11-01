@@ -27,6 +27,8 @@ const services = defineCollection({
     seoTitle: z.string().optional(),
     seoDescription: z.string().max(160).optional(),
     faqs: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
+    /** Editorial note, never rendered: e.g. medical text awaiting the doctor's review. */
+    reviewStatus: z.string().optional(),
   }),
 });
 

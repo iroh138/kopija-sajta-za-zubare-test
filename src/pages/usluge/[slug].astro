@@ -15,6 +15,9 @@ export async function getStaticPaths() {
 
 const { service } = Astro.props;
 const { Content } = await render(service);
+// Markdown links are written root-relative ("/usluge/x"); prefix the base path so they also work in the
+// GitHub Pages preview (/<repo>/...). Falls back to the normal renderer if no pre-rendered HTML exists.
+const bodyHtml = service.rendered?.html?.replace(/href="(\/[^"]*)"/g, (_m: string, h: string) => `href="${url(h)}"`);
 const others = (await getCollection('services'))
   .filter((s) => s.id !== service.id)
   .sort((a, b) => a.data.order - b.data.order);
@@ -56,7 +59,7 @@ const offer = {
     <div class="container with-aside">
       <div class="detail">
         <div class="prose detail__text">
-          <Content />
+          {bodyHtml ? <Fragment set:html={bodyHtml} /> : <Content />}
         </div>
         <section class="detail__scope" aria-labelledby="sub-h">
           <h2 id="sub-h">Šta obuhvata</h2>
