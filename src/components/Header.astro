@@ -27,6 +27,13 @@ const groups = [
     ],
   },
 ];
+// Always-visible links on wide screens; the panel keeps the full list (all services).
+const primary = [
+  { label: 'Usluge', href: '/usluge' },
+  { label: 'O nama', href: '/o-nama' },
+  { label: 'Pitanja', href: '/pitanja' },
+  { label: 'Kontakt', href: '/kontakt' },
+];
 ---
 <header class="site-header">
   <div class="container site-header__inner">
@@ -34,13 +41,21 @@ const groups = [
       <Logo />
     </a>
 
+    <nav class="primary-nav" aria-label="Brze veze">
+      <ul>
+        {primary.map((l) => (
+          <li><a href={url(l.href)} aria-current={here(l.href) ? 'page' : undefined}>{l.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
     <div class="site-header__actions">
       {practice.phone && (
         <a class="btn btn--secondary header-cta" href={`tel:${practice.phone.e164}`} data-nap="phone">Pozovite: {practice.phone.display}</a>
       )}
       <a class="btn btn--primary header-cta" href={url('/zakazivanje')}>Zakažite termin online</a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
-        <span class="visually-hidden">Meni</span>
+        <span class="visually-hidden">Ceo meni</span>
         <span class="menu-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
       </button>
     </div>
@@ -77,6 +92,11 @@ const groups = [
     menu.hidden = !open;
     document.body.classList.toggle('menu-open', open);
   };
+  // Subtle divider once the page scrolls under the sticky header.
+  const header = document.querySelector<HTMLElement>('.site-header');
+  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
   toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') { setOpen(false); toggle.focus(); }
@@ -84,10 +104,21 @@ const groups = [
 </script>
 
 <style>
-  .site-header { background: var(--color-surface); position: relative; z-index: 50; }
-  .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 6rem; }
-  @media (min-width: 900px) { .site-header__inner { min-height: 8.5rem; } }
-  .brand { text-decoration: none; display: inline-block; }
+  .site-header { background: rgb(255 255 255 / 0.94); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid transparent; transition: border-color 200ms ease, box-shadow 200ms ease; }
+  @supports (backdrop-filter: blur(8px)) { .site-header { backdrop-filter: saturate(1.4) blur(10px); } }
+  .site-header.is-scrolled { border-bottom-color: var(--color-divider); box-shadow: 0 6px 20px rgb(30 22 51 / 0.05); }
+  .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 5rem; }
+  @media (min-width: 900px) { .site-header__inner { min-height: 6.25rem; } }
+
+  .primary-nav { display: none; margin-left: auto; }
+  @media (min-width: 1200px) { .primary-nav { display: block; } }
+  .primary-nav ul { list-style: none; display: flex; gap: 0.25rem; margin: 0; padding: 0; }
+  .primary-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.9rem; border-radius: 999px; color: var(--color-ink); text-decoration: none; font-weight: 500; transition: background-color 150ms ease, color 150ms ease; }
+  .primary-nav a:hover { background: var(--color-tint); color: var(--color-accent-strong); }
+  .primary-nav a[aria-current='page'] { color: var(--color-accent-strong); background: var(--color-tint-2); }
+  .brand { text-decoration: none; display: inline-block; padding-block: 0.5rem; }
+  .brand :global(.logo) { width: auto; height: 56px; }
+  @media (min-width: 900px) { .brand :global(.logo) { height: 72px; } }
   .site-header__actions { display: flex; align-items: center; gap: 1.1rem; }
   .header-cta { display: none; }
   @media (min-width: 1024px) { .header-cta { display: inline-flex; } }
@@ -99,7 +130,7 @@ const groups = [
   .menu-toggle[aria-expanded='true'] .menu-toggle__bars span:nth-child(2) { opacity: 0; }
   .menu-toggle[aria-expanded='true'] .menu-toggle__bars span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
-  .site-menu { position: absolute; inset: 100% 0 auto 0; background: var(--color-surface); border-top: 1px solid var(--color-divider); box-shadow: 0 24px 40px rgb(30 22 51 / 0.08); max-height: calc(100dvh - 6rem); overflow: auto; }
+  .site-menu { position: absolute; inset: 100% 0 auto 0; background: var(--color-surface); border-top: 1px solid var(--color-divider); box-shadow: 0 24px 40px rgb(30 22 51 / 0.08); max-height: calc(100dvh - 5rem); overflow: auto; }
   .site-menu__grid { display: grid; gap: var(--space-4); padding-block: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
   .site-menu__title { font-size: var(--step--1); font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-muted); margin-bottom: var(--space-1); }
   .site-menu ul { list-style: none; margin: 0; padding: 0; }

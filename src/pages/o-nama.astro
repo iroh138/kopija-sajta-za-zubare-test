@@ -70,7 +70,7 @@ const people = staff.map((s) => ({
   .about { display: grid; gap: var(--space-4); align-items: center; }
   @media (min-width: 1024px) { .about { grid-template-columns: 1fr 1.2fr; gap: clamp(3rem, 8vw, 9rem); } }
   .about__photo { aspect-ratio: 3 / 4; max-width: 32rem; }
-  .about__text :global(p) { font-size: 1.15rem; font-weight: 300; }
+  .about__text :global(p) { font-size: 1.15rem; }
   .values { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
-  .values p { font-weight: 300; }
+  .values p { color: var(--color-muted); }
 </style>
