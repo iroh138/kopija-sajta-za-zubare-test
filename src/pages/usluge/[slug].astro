@@ -3,8 +3,10 @@ import { url, abs } from '../../lib/url';
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
+import ServiceGrid from '../../components/ServiceGrid.astro';
+import HoursTable from '../../components/HoursTable.astro';
 import { breadcrumbJsonLd, faqJsonLd } from '../../lib/schema';
-import { practice } from '../../lib/practice';
+import { practice, addressLine } from '../../lib/practice';
 
 export async function getStaticPaths() {
   const services = await getCollection('services');
@@ -44,52 +46,66 @@ const offer = {
   </PageHeader>
 
   <section class="section">
-    <div class="container detail">
-      <div class="prose detail__text">
-        <Content />
+    <div class="container with-aside">
+      <div class="detail">
+        <div class="prose detail__text">
+          <Content />
+        </div>
+        <section class="detail__scope" aria-labelledby="sub-h">
+          <h2 id="sub-h">Šta obuhvata</h2>
+          <ul class="check-list check-list--2">
+            {service.data.subservices.map((x) => <li>{x}</li>)}
+          </ul>
+        </section>
+
+        {service.data.faqs.length > 0 && (
+          <section class="detail__faq" aria-labelledby="faq-h">
+            <h2 id="faq-h">Česta pitanja</h2>
+            <div class="faq-group">
+              {service.data.faqs.map((f) => (
+                <details class="faq">
+                  <summary>{f.q}</summary>
+                  <p>{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
-      <aside class="detail__list" aria-labelledby="sub-h">
-        <h2 id="sub-h">Šta obuhvata</h2>
-        <ul>
-          {service.data.subservices.map((x) => <li>{x}</li>)}
+
+      <aside class="panel panel--tint booking-panel" aria-labelledby="book-h">
+        <h2 id="book-h">Zakažite termin</h2>
+        <p>Pošaljite zahtev online, a ordinacija vas kontaktira i potvrđuje termin.</p>
+        <a class="btn btn--primary booking-panel__btn" href={url(`/zakazivanje?usluga=${service.id}`)}>Zakažite termin</a>
+        <ul class="check-list booking-panel__facts">
+          <li>U lokalnoj anesteziji, uz gel pre uboda</li>
+          <li>Pre zahvata objasnimo šta radimo i zašto</li>
         </ul>
+        <h3 class="booking-panel__sub">Radno vreme</h3>
+        <HoursTable showSpecial={false} />
+        <p class="booking-panel__addr"><a href={practice.mapsUrl} rel="noopener">{addressLine()}</a></p>
       </aside>
     </div>
   </section>
 
-  {service.data.faqs.length > 0 && (
-    <section class="section section--tint" aria-labelledby="faq-h">
-      <div class="container prose">
-        <h2 id="faq-h">Česta pitanja</h2>
-        {service.data.faqs.map((f) => (
-          <details class="faq">
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
-          </details>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <section class="section" aria-labelledby="other-h">
+  <section class="section section--tint" aria-labelledby="other-h">
     <div class="container">
       <h2 id="other-h">Ostale usluge</h2>
-      <ul class="pill-grid">
-        {others.map((s) => <li><a class="btn btn--secondary pill" href={url(`/usluge/${s.id}`)}>{s.data.shortTitle ?? s.data.title}</a></li>)}
-      </ul>
+      <ServiceGrid items={others} numbered={false} compact />
+      <a class="btn btn--secondary" href={url('/usluge')}>Pregled svih usluga</a>
     </div>
   </section>
 </Base>
 <style>
   .detail { display: grid; gap: var(--space-4); }
-  @media (min-width: 1024px) { .detail { grid-template-columns: 1.3fr 1fr; gap: var(--space-5); align-items: start; } }
   .detail__text :global(p) { font-size: 1.15rem; }
-  .detail__list { background: var(--color-tint); padding: var(--space-4) var(--space-3); border-radius: var(--radius-sm); }
-  .detail__list h2 { font-size: var(--step-2); }
-  .detail__list ul { margin: 0; padding-left: 1.2rem; }
-  .detail__list li { margin-bottom: 0.45rem; }
-  .pill-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
-  @media (min-width: 700px) { .pill-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1100px) { .pill-grid { grid-template-columns: repeat(3, 1fr); } }
-  .pill { width: 100%; }
+  .detail h2 { font-size: var(--step-2); }
+  .check-list--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); column-gap: var(--space-3); }
+  .booking-panel h2 { font-size: var(--step-2); font-weight: 300; color: var(--color-accent); margin-bottom: var(--space-1); }
+  .booking-panel__btn { width: 100%; margin-bottom: var(--space-3); }
+  .booking-panel__facts { margin-bottom: var(--space-3); font-size: 0.98rem; }
+  .booking-panel__sub { font-size: 1rem; font-weight: 600; color: var(--color-ink); margin-bottom: 0.25rem; }
+  .booking-panel :global(.hours-table) { font-size: 0.95rem; max-width: none; }
+  .booking-panel__addr { margin: var(--space-2) 0 0; font-size: 0.95rem; }
+  .booking-panel__addr a { color: var(--color-muted); }
 </style>

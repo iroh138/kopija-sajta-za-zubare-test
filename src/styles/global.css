@@ -154,6 +154,10 @@ a:hover { color: var(--color-accent-strong); }
 
 /* FAQ accordion (used on home, /pitanja and service pages) */
 .faq { border-bottom: 1px solid var(--color-divider); }
+/* Optional grouped look: a white panel around a set of .faq items */
+.faq-group { background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: var(--radius-lg); padding: 0.25rem var(--space-3); }
+.faq-group .faq:last-child { border-bottom: 0; }
+.faq summary:hover { color: var(--color-accent-strong); }
 .faq summary { cursor: pointer; font-size: 1.15rem; font-weight: 500; color: var(--color-ink); min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; list-style: none; }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary::after { content: '+'; font-size: 1.6rem; font-weight: 300; color: var(--color-accent); flex: none; }
@@ -163,3 +167,22 @@ a:hover { color: var(--color-accent-strong); }
 /* Icon chip used in feature lists */
 .icon-chip { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; background: var(--color-tint-2); color: var(--color-cta); }
 .icon-chip svg { width: 22px; height: 22px; }
+
+/* List with check marks (service scope, what's included) */
+.check-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
+.check-list li { position: relative; padding-left: 2rem; line-height: 1.5; }
+.check-list li::before {
+  content: ''; position: absolute; left: 0; top: 0.1em; width: 1.35rem; height: 1.35rem; border-radius: 50%;
+  background: var(--color-tint-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b4bb3' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 0.8rem no-repeat;
+}
+
+/* Two-column page body: main content + sticky side panel */
+.with-aside { display: grid; gap: var(--space-4); align-items: start; }
+@media (min-width: 1024px) {
+  .with-aside { grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 1fr); gap: var(--space-5); }
+  .with-aside > aside { position: sticky; top: 8rem; }
+}
+.panel { background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: var(--radius-lg); padding: var(--space-3); }
+.panel--tint { background: var(--color-tint); border-color: var(--color-tint-2); }
+.panel h2 { font-size: var(--step-1); font-weight: 500; color: var(--color-ink); }
+.panel > :last-child { margin-bottom: 0; }

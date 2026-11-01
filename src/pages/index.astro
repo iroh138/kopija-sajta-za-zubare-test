@@ -4,6 +4,9 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import LocationBlock from '../components/LocationBlock.astro';
 import Carousel from '../components/Carousel.astro';
+import ServiceGrid from '../components/ServiceGrid.astro';
+import Reasons from '../components/Reasons.astro';
+import CtaBand from '../components/CtaBand.astro';
 import { practice } from '../lib/practice';
 import faq from '../data/faq.json';
 
@@ -88,16 +91,7 @@ const { city } = practice.address;
         </div>
         <p>Od prvog pregleda i čišćenja kamenca do lečenja kanala i vađenja zuba. Implante i ortodonciju ne radimo; za te tretmane vas upućujemo proverenim kolegama specijalistima.</p>
       </div>
-      <ul class="svc-grid">
-        {featured.map((s, i) => (
-          <li class="svc">
-            <span class="svc__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <h3 class="svc__title"><a href={url(`/usluge/${s.id}`)}>{s.data.shortTitle ?? s.data.title}</a></h3>
-            <p>{s.data.summary}</p>
-            <span class="svc__more" aria-hidden="true">Detaljnije <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-          </li>
-        ))}
-      </ul>
+      <ServiceGrid items={featured} />
       <a class="btn btn--secondary" href={url('/usluge')}>Pregled svih usluga</a>
     </div>
   </section>
@@ -130,17 +124,7 @@ const { city } = practice.address;
     <div class="container split split--media-right">
       <div class="split__body">
         <h2 id="why-h">Zašto nas pacijenti biraju</h2>
-        <ul class="reasons">
-          {practice.reasons.map((r) => (
-            <li class="reason">
-              <span class="icon-chip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-              <div>
-                <h3>{r.title}</h3>
-                <p>{r.body}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <Reasons />
         <a class="btn btn--secondary" href={url('/o-nama')}>Upoznajte doktorku</a>
       </div>
       {lead?.data.photo && (
@@ -180,14 +164,11 @@ const { city } = practice.address;
     </section>
   )}
 
-  <!-- CTA -->
-  <section class="cta" aria-labelledby="cta-h">
-    <div class="container cta__inner">
-      <h2 id="cta-h">Plašite se zubara?</h2>
-      <p>Niste jedini, i zato radimo polako, uz lokalnu anesteziju i objašnjenje svakog koraka. Kod nas i najplašljiviji pacijenti prvi put dožive stomatologiju bez neprijatnosti.</p>
-      <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite prvi pregled</a>
-    </div>
-  </section>
+  <CtaBand
+    title="Plašite se zubara?"
+    text="Niste jedini, i zato radimo polako, uz lokalnu anesteziju i objašnjenje svakog koraka. Kod nas i najplašljiviji pacijenti prvi put dožive stomatologiju bez neprijatnosti."
+    label="Zakažite prvi pregled"
+  />
 
   <!-- FAQ teaser + payment -->
   <section class="section" aria-labelledby="faq-h">
@@ -289,24 +270,7 @@ const { city } = practice.address;
   .section-head p:not(.eyebrow) { color: var(--color-muted); margin: 0; }
   @media (min-width: 1024px) { .section-head { grid-template-columns: 1.1fr 1fr; align-items: end; gap: var(--space-5); } }
 
-  /* Service cards (whole card clickable via the heading link) */
-  .svc-grid { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
-  .svc {
-    position: relative; display: flex; flex-direction: column; gap: 0.5rem; padding: var(--space-3);
-    background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: var(--radius-lg);
-    transition: box-shadow 200ms var(--ease), transform 200ms var(--ease), border-color 200ms var(--ease);
-  }
-  .svc:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); border-color: var(--color-tint-2); }
-  .svc__num { font-size: var(--step--1); font-weight: 600; letter-spacing: 0.08em; color: var(--color-accent); }
-  .svc__title { font-size: var(--step-1); font-weight: 500; margin: 0; }
-  .svc__title a { color: var(--color-ink); text-decoration: none; }
-  .svc__title a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius-lg); }
-  .svc__title a:focus-visible { outline: none; }
-  .svc__title a:focus-visible::after { outline: var(--focus-ring); outline-offset: 3px; }
-  .svc p { color: var(--color-muted); font-size: 0.98rem; line-height: 1.6; margin: 0; flex: 1; }
-  .svc__more { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.5rem; font-weight: 600; color: var(--color-cta); }
-  .svc__more svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms var(--ease); }
-  .svc:hover .svc__more svg { transform: translateX(4px); }
+
 
   /* Office gallery (layout from the reference's technology section) */
   .tech__inner { display: grid; gap: var(--space-4); }
@@ -325,12 +289,6 @@ const { city } = practice.address;
   }
 
   /* Why us */
-  .reasons { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: var(--space-3); }
-  .reasons { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
-  .reason { display: flex; gap: 1rem; align-items: flex-start; }
-  .reason h3 { font-size: var(--step-1); font-weight: 500; color: var(--color-ink); margin-bottom: 0.35rem; }
-  .reason p { font-size: 1rem; line-height: 1.6; color: var(--color-muted); margin: 0; }
-  .icon-chip svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 
   /* Reviews */
   .review-grid { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 36rem)); }
@@ -343,10 +301,5 @@ const { city } = practice.address;
   .review figcaption { color: var(--color-ink); }
   .review__tag { margin-left: 0.6rem; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.15rem 0.6rem; border-radius: 999px; background: #fef3c7; color: #78350f; }
 
-  /* CTA */
-  .cta { padding-block: var(--space-5); }
-  .cta__inner { background: var(--color-tint); border: 1px solid var(--color-tint-2); border-radius: 32px; padding: var(--space-5) var(--space-3); text-align: center; }
-  .cta__inner { display: flex; flex-direction: column; align-items: center; }
-  .cta p { max-width: 46rem; font-size: 1.1rem; }
 
 </style>

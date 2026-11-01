@@ -16,17 +16,30 @@ const site = Astro.site ?? new URL(Astro.url.origin);
 >
   <PageHeader title="Pitanja i odgovori" lead="Odgovori na pitanja koja nam pacijenti najčešće postavljaju." crumbs={crumbs} />
   <section class="section">
-    <div class="container prose">
-      {faq.map((f, i) => (
-        <details class="faq" open={i === 0}>
-          <summary>{f.q}</summary>
-          <p>{f.a}</p>
-        </details>
-      ))}
-      <h2>Plaćanje</h2>
-      <p>{practice.paymentNote}</p>
-      <p>Niste pronašli odgovor? Pišite nam na <a href={`mailto:${practice.email}`}>{practice.email}</a> ili ostavite pitanje u obrascu za zakazivanje.</p>
-      <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin online</a>
+    <div class="container with-aside">
+      <div class="faq-group">
+        {faq.map((f, i) => (
+          <details class="faq" open={i === 0}>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+      <aside class="aside-stack">
+        <section class="panel panel--tint" aria-labelledby="pay-h">
+          <h2 id="pay-h">Plaćanje</h2>
+          <p>{practice.paymentNote}</p>
+        </section>
+        <section class="panel" aria-labelledby="ask-h">
+          <h2 id="ask-h">Niste pronašli odgovor?</h2>
+          <p>Pišite nam na <a href={`mailto:${practice.email}`}>{practice.email}</a> ili ostavite pitanje u obrascu za zakazivanje.</p>
+          <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin online</a>
+        </section>
+      </aside>
     </div>
   </section>
 </Base>
+<style>
+  .aside-stack { display: grid; gap: var(--space-2); }
+  .aside-stack .btn { width: 100%; }
+</style>

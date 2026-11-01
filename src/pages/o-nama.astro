@@ -3,6 +3,8 @@ import { url, abs } from '../lib/url';
 import { getCollection, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
+import Reasons from '../components/Reasons.astro';
+import CtaBand from '../components/CtaBand.astro';
 import { breadcrumbJsonLd } from '../lib/schema';
 import { practice } from '../lib/practice';
 
@@ -39,6 +41,11 @@ const people = staff.map((s) => ({
           <p class="eyebrow">{s.data.role}</p>
           <h2>{s.data.honorific} {s.data.name}</h2>
           <Content />
+          <dl class="facts">
+            <div><dt>Godina rada</dt><dd>{practice.yearsActive}</dd></div>
+            <div><dt>Lokacija</dt><dd>{practice.address.city}</dd></div>
+            <div><dt>Pacijenti</dt><dd>Odrasli i deca</dd></div>
+          </dl>
         </div>
       </div>
     </section>
@@ -46,31 +53,24 @@ const people = staff.map((s) => ({
 
   <section class="section section--tint" aria-labelledby="values-h">
     <div class="container">
+      <p class="eyebrow">Naš pristup</p>
       <h2 id="values-h">Kako radimo</h2>
-      <ul class="values">
-        {practice.reasons.map((r) => (
-          <li>
-            <h3>{r.title}</h3>
-            <p>{r.body}</p>
-          </li>
-        ))}
-      </ul>
+      <Reasons min="20rem" />
     </div>
   </section>
 
-  <section class="section">
-    <div class="container" style="text-align:center">
-      <h2>Na čemu smo najviše ponosni</h2>
-      <p style="margin-inline:auto; font-weight:300; font-size:1.15rem">Kod nas i najplašljiviji pacijenti uspeju da savladaju strah i prvi put dožive stomatologiju bez neprijatnosti. Mnogi navrate i samo da pozdrave doktorku.</p>
-      <a class="btn btn--primary" href={url('/zakazivanje')}>Zakažite termin online</a>
-    </div>
-  </section>
+  <CtaBand
+    title="Na čemu smo najviše ponosni"
+    text="Kod nas i najplašljiviji pacijenti uspeju da savladaju strah i prvi put dožive stomatologiju bez neprijatnosti. Mnogi navrate i samo da pozdrave doktorku."
+  />
 </Base>
 <style>
   .about { display: grid; gap: var(--space-4); align-items: center; }
   @media (min-width: 1024px) { .about { grid-template-columns: 1fr 1.2fr; gap: clamp(3rem, 8vw, 9rem); } }
   .about__photo { aspect-ratio: 3 / 4; max-width: 32rem; }
   .about__text :global(p) { font-size: 1.15rem; }
-  .values { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
-  .values p { color: var(--color-muted); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--space-2); margin: var(--space-4) 0 0; }
+  .facts div { border-top: 2px solid var(--color-tint-2); padding-top: var(--space-2); }
+  .facts dt { font-size: var(--step--1); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); }
+  .facts dd { margin: 0.25rem 0 0; font-size: var(--step-1); font-weight: 500; color: var(--color-ink); }
 </style>
