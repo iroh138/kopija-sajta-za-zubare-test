@@ -2,6 +2,8 @@
 title: Oralna hirurgija (osnovne intervencije)
 shortTitle: Oralna hirurgija
 summary: Vađenje mlečnih i stalnih zuba, uklanjanje zaostalih korenova, drenaža apscesa i uklanjanje manjih promena na mekim tkivima, u sterilnim uslovima.
+seoTitle: "Vađenje zuba na Novom Beogradu"
+seoDescription: "Vađenje mlečnih i stalnih zuba i zaostalih korenova u lokalnoj anesteziji, uz gel pre uboda. Ordinacija 3A DENT, Novi Beograd."
 order: 3
 subservices:
   - Vađenje mlečnih zuba

@@ -1,6 +1,8 @@
 ---
 title: Osnovna protetika
 summary: Uzimanje otisaka, privremene krunice, mostovi i mobilne proteze, kao i popravka, rebaziranje i dorada postojećih proteza.
+seoTitle: "Proteze, krunice i mostovi – Novi Beograd"
+seoDescription: "Privremene krunice i mostovi, mobilne proteze, popravka i rebaziranje proteza u ordinaciji 3A DENT na Novom Beogradu."
 order: 4
 subservices:
   - Uzimanje otisaka

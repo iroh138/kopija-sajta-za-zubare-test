@@ -2,6 +2,8 @@
 title: Endodoncija (lečenje kanala)
 shortTitle: Lečenje kanala
 summary: Lečenje pulpitisa i gangrene, ručna i mašinska obrada kanala, trajno punjenje i ponovno lečenje ranije lečenih zuba.
+seoTitle: "Lečenje kanala zuba na Novom Beogradu"
+seoDescription: "Lečenje kanala i živca zuba, mašinska obrada i ponovno lečenje kanala u lokalnoj anesteziji. 3A DENT, Novi Beograd. Zakazivanje online."
 order: 5
 subservices:
   - Lečenje pulpitisa (vađenje živca)

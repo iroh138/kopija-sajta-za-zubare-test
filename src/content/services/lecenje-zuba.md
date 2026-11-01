@@ -2,6 +2,8 @@
 title: Konzervativna stomatologija (lečenje zuba)
 shortTitle: Lečenje zuba
 summary: Uklanjanje karijesa i plombe po izboru (bele kompozitne, glas-jonomer ili amalgamske), rekonstrukcija oštećenih zuba i estetske korekcije kompozitom.
+seoTitle: "Plombe i lečenje zuba na Novom Beogradu"
+seoDescription: "Bele kompozitne plombe, lečenje karijesa i rekonstrukcija zuba u lokalnoj anesteziji. 3A DENT, Jurija Gagarina 155a, Novi Beograd."
 order: 2
 subservices:
   - Uklanjanje karijesa

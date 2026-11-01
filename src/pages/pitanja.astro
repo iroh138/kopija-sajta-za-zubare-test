@@ -10,7 +10,7 @@ const crumbs = [{ name: 'Početna', path: '/' }, { name: 'Pitanja i odgovori', p
 const site = Astro.site ?? new URL(Astro.url.origin);
 ---
 <Base
-  title="Pitanja i odgovori"
+  title={`Pitanja i odgovori – stomatolog ${practice.address.city}`}
   description={`Da li boli, kako se zakazuje, radi li ${practice.name} vikendom i preko osiguranja, koliko traje intervencija: odgovori na najčešća pitanja pacijenata.`}
   jsonLd={[breadcrumbJsonLd(site, crumbs), faqJsonLd(faq)]}
 >

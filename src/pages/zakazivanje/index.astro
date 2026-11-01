@@ -68,7 +68,7 @@ if (!IS_STATIC_PREVIEW && Astro.request.method === 'POST') {
 const errorList = Object.entries(errors) as [string, string][];
 const describe = (field: string) => (errors as Record<string, string>)[field] ? `${field}-error` : undefined;
 ---
-<Base title="Zakazivanje termina" description={`Zakažite termin u ordinaciji ${practice.name} online. Ordinacija vam potvrđuje termin.`}>
+<Base title={`Zakazivanje termina – stomatolog ${practice.address.city}`} description={`Zakažite termin kod stomatologa ${practice.locative} online. Ordinacija ${practice.name} vas kontaktira i potvrđuje termin.`}>
   <PageHeader
     title="Zakažite termin"
     lead="Termini se zakazuju isključivo online. Pošaljite zahtev, a ordinacija će vas kontaktirati i potvrditi termin."

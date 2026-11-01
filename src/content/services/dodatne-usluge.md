@@ -2,6 +2,8 @@
 title: Dodatne opšte usluge
 shortTitle: Dodatne usluge
 summary: Terapija afti i herpesa, pomoć kod bolova u vilici, beljenje zuba u ordinaciji i kod kuće, i hitne intervencije u radno vreme.
+seoTitle: "Beljenje zuba i terapija afti – Novi Beograd"
+seoDescription: "Beljenje zuba u ordinaciji i kod kuće, terapija afti i herpesa i pomoć kod bolova u vilici. 3A DENT, Novi Beograd."
 order: 7
 subservices:
   - Terapija afti, herpesa i ranica u ustima

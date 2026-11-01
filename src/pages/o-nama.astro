@@ -5,32 +5,37 @@ import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Reasons from '../components/Reasons.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { breadcrumbJsonLd } from '../lib/schema';
+import { breadcrumbJsonLd, ids } from '../lib/schema';
 import { practice } from '../lib/practice';
 
 const staff = (await getCollection('staff')).sort((a, b) => a.data.order - b.data.order);
 const members = await Promise.all(staff.map(async (s) => ({ s, Content: (await render(s)).Content })));
+const lead = staff[0] ? `${staff[0].data.honorific ? staff[0].data.honorific + ' ' : ''}${staff[0].data.name}` : '';
 const crumbs = [{ name: 'Početna', path: '/' }, { name: 'O nama', path: '/o-nama' }];
 const site = Astro.site ?? new URL(Astro.url.origin);
 const people = staff.map((s) => ({
   '@context': 'https://schema.org',
   '@type': 'Person',
+  '@id': ids.person(site, s.id),
   name: s.data.name,
+  url: abs(`/o-nama#${s.id}`, site),
+  knowsLanguage: 'sr',
   ...(s.data.honorific ? { honorificPrefix: s.data.honorific } : {}),
   jobTitle: s.data.role,
-  worksFor: { '@id': abs('/#ordinacija', site) },
+  worksFor: { '@id': ids.practice(site) },
+  ...(s.data.credentials ? { hasOccupation: { '@type': 'Occupation', name: s.data.credentials } } : {}),
   ...(s.data.photo ? { image: abs(s.data.photo.src, site) } : {}),
 }));
 ---
 <Base
-  title="O nama"
-  description={`${practice.legalName} na Novom Beogradu: ${practice.yearsActive} godina rada, dr Aleksandra Cicović i pristup bez bola i straha.`}
+  title={lead ? `O nama – ${lead}, stomatolog` : 'O nama'}
+  description={`${practice.legalName} ${practice.locative}: ${practice.yearsActive} godina rada${lead ? `, ${lead}` : ''} i pristup bez bola i straha.`}
   jsonLd={[breadcrumbJsonLd(site, crumbs), ...people]}
 >
   <PageHeader title="O nama" lead={practice.tagline} crumbs={crumbs} />
 
   {members.map(({ s, Content }) => (
-    <section class="section">
+    <section class="section" id={s.id}>
       <div class="container about">
         {s.data.photo && (
           <div class="arch about__photo">

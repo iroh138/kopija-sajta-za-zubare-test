@@ -1,8 +1,44 @@
 import { abs } from './url';
 import { practice, DAY_NAMES_EN } from './practice';
 
+/**
+ * Entity links for areaServed (helps search engines and AI assistants resolve the place, not just the string).
+ * Only verified URLs belong here; an area without an entry is emitted by name only.
+ */
+const PLACE_LINKS: Record<string, { type: string; sameAs: string }> = {
+  'Novi Beograd': { type: 'AdministrativeArea', sameAs: 'https://en.wikipedia.org/wiki/New_Belgrade' },
+  Beograd: { type: 'City', sameAs: 'https://en.wikipedia.org/wiki/Belgrade' },
+};
+
+/** Stable @id values so entities on different pages point at each other. */
+export const ids = {
+  practice: (site: URL) => abs('/#ordinacija', site),
+  website: (site: URL) => abs('/#website', site),
+  person: (site: URL, slug: string) => abs(`/o-nama#${slug}`, site),
+  service: (site: URL, slug: string) => abs(`/usluge/${slug}#usluga`, site),
+};
+
+export function websiteJsonLd(site: URL) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': ids.website(site),
+    url: abs('/', site),
+    name: practice.name,
+    inLanguage: 'sr-Latn-RS',
+    publisher: { '@id': ids.practice(site) },
+  };
+}
+
 /** Practice JSON-LD, generated from practice.json so it always matches the visible NAP and hours. */
-export function practiceJsonLd(site: URL) {
+interface PracticeLinks {
+  /** Service pages: [slug, name] — listed as availableService. */
+  services?: { slug: string; name: string }[];
+  /** Staff slugs on /o-nama — linked as employee. */
+  staff?: { slug: string; name: string }[];
+}
+
+export function practiceJsonLd(site: URL, links: PracticeLinks = {}) {
   const p = practice;
   const openingHoursSpecification = p.hours
     .filter((h) => !('closed' in h && h.closed))
@@ -25,7 +61,7 @@ export function practiceJsonLd(site: URL) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Dentist',
-    '@id': abs('/#ordinacija', site),
+    '@id': ids.practice(site),
     name: p.name,
     alternateName: p.legalName,
     slogan: p.tagline,
@@ -34,6 +70,8 @@ export function practiceJsonLd(site: URL) {
     image: abs('/images/hero.webp', site),
     ...(p.phone ? { telephone: p.phone.e164 } : {}),
     email: p.email,
+    medicalSpecialty: 'https://schema.org/Dentistry',
+    knowsLanguage: 'sr',
     isAcceptingNewPatients: p.acceptingNewPatients,
     currenciesAccepted: 'RSD',
     address: {
@@ -50,7 +88,13 @@ export function practiceJsonLd(site: URL) {
     hasMap: p.mapsUrl,
     openingHoursSpecification,
     ...(specialOpeningHoursSpecification.length ? { specialOpeningHoursSpecification } : {}),
-    areaServed: p.serviceAreas.map((name) => ({ '@type': 'Place', name })),
+    areaServed: p.serviceAreas.map((name) =>
+      PLACE_LINKS[name] ? { '@type': PLACE_LINKS[name].type, name, sameAs: PLACE_LINKS[name].sameAs } : { '@type': 'Place', name },
+    ),
+    ...(links.services?.length
+      ? { availableService: links.services.map((x) => ({ '@type': 'MedicalProcedure', '@id': ids.service(site, x.slug), name: x.name, url: abs(`/usluge/${x.slug}`, site) })) }
+      : {}),
+    ...(links.staff?.length ? { employee: links.staff.map((x) => ({ '@id': ids.person(site, x.slug), name: x.name })) } : {}),
     ...(sameAs.length ? { sameAs } : {}),
   };
 }

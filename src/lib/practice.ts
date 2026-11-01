@@ -48,6 +48,12 @@ const PracticeSchema = z.object({
   hours: z.array(hour).length(7),
   specialDates: z.array(special),
   serviceAreas: z.array(z.string()),
+  /** Locative used in headings and copy, e.g. "na Novom Beogradu". */
+  locative: z.string(),
+  /** Neighbourhood / block as patients and Google know it, e.g. "Blok 44". Empty = not shown. Must be confirmed by the client. */
+  neighborhood: z.string().default(''),
+  /** Verified directions (landmarks, transit, parking). Rendered on /kontakt only when non-empty. */
+  directions: z.array(z.string()).default([]),
   insurers: z.array(z.object({ name: z.string(), accepted: z.boolean(), notes: z.string().optional() })),
   payments: z.array(z.object({ name: z.string(), description: z.string() })),
   paymentNote: z.string(),

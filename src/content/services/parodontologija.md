@@ -2,6 +2,8 @@
 title: Parodontologija (osnovni tretmani)
 shortTitle: Lečenje desni
 summary: Uklanjanje plaka i kamenca, lečenje gingivitisa, kiretaža plitkih džepova i kontrole posle terapije.
+seoTitle: "Lečenje desni i uklanjanje kamenca – Novi Beograd"
+seoDescription: "Uklanjanje plaka i kamenca, lečenje gingivitisa i kiretaža plitkih džepova u ordinaciji 3A DENT na Novom Beogradu."
 order: 6
 subservices:
   - Uklanjanje plaka i kamenca

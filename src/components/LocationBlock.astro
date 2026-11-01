@@ -16,6 +16,7 @@ const H = headingLevel;
     <address>
       <strong>{practice.legalName}</strong><br />
       <span data-nap="address">{addressLine()}</span><br />
+      {practice.neighborhood && <>{practice.neighborhood}, {practice.address.city}<br /></>}
       {practice.phone && <><a href={`tel:${practice.phone.e164}`} data-nap="phone">{practice.phone.display}</a><br /></>}
       <a href={`mailto:${practice.email}`}>{practice.email}</a>
     </address>

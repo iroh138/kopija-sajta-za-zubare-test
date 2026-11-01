@@ -74,6 +74,8 @@ booking, cross-site rejection, admin login and a backup.
 | What | File |
 | --- | --- |
 | Name, address, phone, email, hours, special dates, service areas, insurers, payments | `src/data/practice.json` (single source of truth, validated on build) |
+| Local SEO copy: locative ("na Novom Beogradu"), neighbourhood, directions | `src/data/practice.json` (`locative`, `neighborhood`, `directions`; empty = hidden) — see `SEO-LOCAL.md` |
+| Per-service SEO title/description | `seoTitle` / `seoDescription` in `src/content/services/*.md` |
 | Services (one Markdown file each, sub-services listed inside) | `src/content/services/*.md` |
 | FAQ | `src/data/faq.json` |
 | Photos, logo, video | `public/images/`, `public/video/` |

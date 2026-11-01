@@ -1,7 +1,7 @@
 ---
 import { url } from '../lib/url';
-interface Props { title: string; lead?: string; crumbs?: { name: string; path: string }[] }
-const { title, lead, crumbs = [] } = Astro.props;
+interface Props { title: string; lead?: string; eyebrow?: string; crumbs?: { name: string; path: string }[] }
+const { title, lead, eyebrow, crumbs = [] } = Astro.props;
 ---
 <div class="page-header">
   <div class="container">
@@ -14,6 +14,7 @@ const { title, lead, crumbs = [] } = Astro.props;
         </ol>
       </nav>
     )}
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
     <h1>{title}</h1>
     {lead && <p class="lead">{lead}</p>}
     <slot />

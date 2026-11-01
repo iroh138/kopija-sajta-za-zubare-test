@@ -1,6 +1,8 @@
 ---
 title: Preventiva i dijagnostika
 summary: Prvi pregled i redovne kontrole, profesionalno čišćenje zuba, zaštita dečjih zuba i RTG dijagnostika.
+seoTitle: "Pregled i čišćenje kamenca na Novom Beogradu"
+seoDescription: "Prvi pregled, kontrole, čišćenje kamenca ultrazvukom i zaštita dečjih zuba u ordinaciji 3A DENT na Novom Beogradu. Zakažite termin online."
 order: 1
 subservices:
   - Prvi stomatološki pregled

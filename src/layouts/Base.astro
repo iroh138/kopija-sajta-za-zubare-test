@@ -9,7 +9,8 @@ import Footer from '../components/Footer.astro';
 import MobileBar from '../components/MobileBar.astro';
 import ConsentBanner from '../components/ConsentBanner.astro';
 import { practice } from '../lib/practice';
-import { practiceJsonLd, ld } from '../lib/schema';
+import { practiceJsonLd, websiteJsonLd, ld } from '../lib/schema';
+import { getCollection } from 'astro:content';
 
 interface Props {
   title: string;
@@ -23,7 +24,12 @@ const { title, description, jsonLd = [], noindex = false, ogImage = '/og-default
 const site = Astro.site ?? new URL(Astro.url.origin);
 const canonical = abs(Astro.url.pathname, site);
 const fullTitle = title.includes(practice.name) ? title : `${title} | ${practice.name}`;
-const blocks = [practiceJsonLd(site), ...jsonLd.filter(Boolean)];
+const serviceLinks = (await getCollection('services'))
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((s) => ({ slug: s.id, name: s.data.shortTitle ?? s.data.title }));
+const staffLinks = (await getCollection('staff')).map((s) => ({ slug: s.id, name: `${s.data.honorific ? s.data.honorific + ' ' : ''}${s.data.name}` }));
+const isHome = (Astro.url.pathname.replace(/\/$/, '') || '/') === (url('/').replace(/\/$/, '') || '/');
+const blocks = [practiceJsonLd(site, { services: serviceLinks, staff: staffLinks }), ...(isHome ? [websiteJsonLd(site)] : []), ...jsonLd.filter(Boolean)];
 ---
 <!doctype html>
 <html lang="sr-Latn">

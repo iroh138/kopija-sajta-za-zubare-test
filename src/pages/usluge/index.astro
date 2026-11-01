@@ -13,10 +13,10 @@ const site = Astro.site ?? new URL(Astro.url.origin);
 ---
 <Base
   title={`Stomatološke usluge – ${practice.address.city}`}
-  description={`Sve usluge ordinacije ${practice.name}: preventiva, lečenje zuba i kanala, oralna hirurgija, protetika, lečenje desni i beljenje zuba.`}
+  description={`Usluge ordinacije ${practice.name} ${practice.locative}: pregledi, plombe, lečenje kanala, vađenje zuba, proteze, lečenje desni i beljenje zuba.`}
   jsonLd={[breadcrumbJsonLd(site, crumbs)]}
 >
-  <PageHeader title="Usluge" lead="Opšta stomatologija za odrasle i decu, sve u lokalnoj anesteziji." crumbs={crumbs} />
+  <PageHeader title={`Stomatološke usluge ${practice.locative}`} lead="Opšta stomatologija za odrasle i decu, sve u lokalnoj anesteziji." crumbs={crumbs} />
 
   <section class="section">
     <div class="container">

@@ -9,11 +9,11 @@ const crumbs = [{ name: 'Početna', path: '/' }, { name: 'Kontakt', path: '/kont
 const site = Astro.site ?? new URL(Astro.url.origin);
 ---
 <Base
-  title="Kontakt i lokacija"
+  title={`Kontakt i radno vreme – stomatolog ${practice.address.city}`}
   description={`Adresa, radno vreme i mapa: ${practice.legalName}, ${addressLine()}. Zakazivanje isključivo online.`}
   jsonLd={[breadcrumbJsonLd(site, crumbs)]}
 >
-  <PageHeader title="Kontakt" lead="Termine zakazujemo isključivo online. Za ostala pitanja pišite nam na e-mail." crumbs={crumbs} />
+  <PageHeader title="Kontakt i lokacija" lead="Termine zakazujemo isključivo online. Za ostala pitanja pišite nam na e-mail." crumbs={crumbs} />
   <section class="section section--compact" aria-label="Brzi kontakt">
     <div class="container">
       <ul class="quick">
@@ -35,6 +35,16 @@ const site = Astro.site ?? new URL(Astro.url.origin);
   <section class="section section--tint">
     <div class="container"><LocationBlock /></div>
   </section>
+  {practice.directions.length > 0 && (
+    <section class="section" aria-labelledby="dir-h">
+      <div class="container prose">
+        <h2 id="dir-h">Kako do nas</h2>
+        <ul class="check-list">
+          {practice.directions.map((d) => <li>{d}</li>)}
+        </ul>
+      </div>
+    </section>
+  )}
 </Base>
 <style>
   .section--compact { padding-block: var(--space-4); }
